@@ -6,9 +6,21 @@ import Home from "../Screens/Home/Home";
 import Splash from "../Screens/Splash";
 import Announcement from "../Screens/Announcement/Announcement";
 import { Ionicons } from "@expo/vector-icons";
+import MosqueAvailable from "../Screens/Announcement/MosqueAvailable/MosqueAvailable";
+
+export type RootStackParamList = {
+  Splash: undefined;
+  Main: undefined;
+  MosqueAvailable: undefined; // Add this to represent the "MosqueAvailable" screen
+};
+
+export type RootTabParamList = {
+  Home: undefined;
+  Announcement: undefined;
+};
 
 // Create the stack and tab navigators
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator();
 
 // Define a Tab navigator component
@@ -73,6 +85,13 @@ const AppNavigation = () => {
         <Stack.Screen
           name="Main"
           component={TabNavigator}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="MosqueAvailable"
+          component={MosqueAvailable}
           options={{
             headerShown: false,
           }}

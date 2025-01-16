@@ -1,11 +1,12 @@
-import { View, Text } from "react-native";
 import React from "react";
+import { AnnouncementProvider } from "../Context/AnnouncementContext";
+import Section from "./Section";
 
 const Announcement = () => {
   return (
-    <View>
-      <Text>Announcement</Text>
-    </View>
+    <AnnouncementProvider>
+      <Section />
+    </AnnouncementProvider>
   );
 };
 

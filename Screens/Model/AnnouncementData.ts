@@ -1,3 +1,5 @@
+import { ImageSourcePropType } from "react-native";
+
 interface Announcement {
   title: string;
   date: Date;
@@ -7,6 +9,8 @@ interface Announcement {
 interface MosqueDetails {
   id: number;
   mosque: string;
+  picture: ImageSourcePropType | undefined;
+  description: string;
   mosqueLat: number;
   mosqueLong: number;
   announcement: Announcement[];

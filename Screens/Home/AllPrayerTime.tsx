@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
-import prayerSchedule from "../Data/PrayerTimeData";
+import prayerSchedule from "../Model/PrayerTimeData";
 
 const PrayerTimesDisplay = () => {
   // Function to format time to 12-hour format with AM/PM

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Dimensions } from "react-native";
-import prayerSchedule from "../Data/PrayerTimeData";
+import prayerSchedule from "../Model/PrayerTimeData";
 import moment from "moment-hijri";
 
 interface PrayerTime {

@@ -1,17 +1,21 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  getFocusedRouteNameFromRoute,
+  NavigationContainer,
+} from "@react-navigation/native";
 import Home from "../Screens/Home/Home";
 import Splash from "../Screens/Splash";
 import Announcement from "../Screens/Announcement/Announcement";
 import { Ionicons } from "@expo/vector-icons";
 import MosqueAvailable from "../Screens/Announcement/MosqueAvailable/MosqueAvailable";
+import { AnnouncementProvider } from "../Screens/Context/AnnouncementContext";
+import { ViewStyle } from "react-native";
 
 export type RootStackParamList = {
   Splash: undefined;
   Main: undefined;
-  MosqueAvailable: undefined; // Add this to represent the "MosqueAvailable" screen
 };
 
 export type RootTabParamList = {
@@ -19,34 +23,70 @@ export type RootTabParamList = {
   Announcement: undefined;
 };
 
+export type AnnouncementStackParamList = {
+  AnnouncementMain: undefined;
+  MosqueAvailable: undefined;
+};
+
 // Create the stack and tab navigators
 const Stack = createNativeStackNavigator<RootStackParamList>();
-const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<RootTabParamList>();
+
+//each its own stack with wrapped context
+const AnnouncementStack =
+  createNativeStackNavigator<AnnouncementStackParamList>();
+
+// Create Announcement Stack Navigator
+const AnnouncementNavigator = () => {
+  return (
+    <AnnouncementProvider>
+      <AnnouncementStack.Navigator>
+        <AnnouncementStack.Screen
+          name="AnnouncementMain"
+          component={Announcement}
+          options={{ headerShown: false }}
+        />
+        <AnnouncementStack.Screen
+          name="MosqueAvailable"
+          component={MosqueAvailable}
+          options={{ headerShown: false }}
+        />
+      </AnnouncementStack.Navigator>
+    </AnnouncementProvider>
+  );
+};
 
 // Define a Tab navigator component
 const TabNavigator = () => {
+  const tabBarStyle: ViewStyle = {
+    backgroundColor: "#ffffff",
+    borderRadius: 15,
+    height: 60,
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 30,
+    marginHorizontal: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 5,
+    overflow: "hidden",
+  };
+
   return (
     <Tab.Navigator
-      screenOptions={{
+      screenOptions={({ route }) => ({
         tabBarActiveTintColor: "#66C266",
         tabBarInactiveTintColor: "#999999",
-        tabBarStyle: {
-          backgroundColor: "#ffffff",
-          borderRadius: 15,
-          height: 60,
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: 30,
-          marginHorizontal: 10,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: -3 },
-          shadowOpacity: 0.1,
-          shadowRadius: 3,
-          elevation: 5,
-          overflow: "hidden",
-        },
-      }}
+        tabBarStyle: ((route) => {
+          const routeName = getFocusedRouteNameFromRoute(route);
+          return routeName === "MosqueAvailable"
+            ? { display: "none" }
+            : tabBarStyle;
+        })(route),
+      })}
     >
       <Tab.Screen
         name="Home"
@@ -60,8 +100,9 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Announcement"
-        component={Announcement}
+        component={AnnouncementNavigator}
         options={{
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="megaphone" color={color} size={size} />
           ),
@@ -85,13 +126,6 @@ const AppNavigation = () => {
         <Stack.Screen
           name="Main"
           component={TabNavigator}
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="MosqueAvailable"
-          component={MosqueAvailable}
           options={{
             headerShown: false,
           }}

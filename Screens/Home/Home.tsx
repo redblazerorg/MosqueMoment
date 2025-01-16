@@ -14,10 +14,16 @@ import PrayerTimesDisplay from "./AllPrayerTime";
 const Home = () => {
   const width = Dimensions.get("window").width;
   return (
-    <View style={styles.container}>
+    <View
+      style={{
+        flex: 1,
+      }}
+    >
       <LinearGradient
         colors={["#006400", "#66C266"]} // Dark green to light green
-        style={styles.gradient}
+        style={{
+          flex: 1,
+        }}
         start={{ x: 0, y: 0.3 }}
         end={{ x: 0, y: 1 }} // This makes the gradient transition happen in top 30%
       >
@@ -44,13 +50,5 @@ const Home = () => {
     </View>
   );
 };
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  gradient: {
-    flex: 1,
-  },
-});
 
 export default Home;

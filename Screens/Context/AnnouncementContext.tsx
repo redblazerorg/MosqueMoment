@@ -1,9 +1,11 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-import MosqueDetails from "../Data/AnnouncementData";
+import MosqueDetails from "../Model/AnnouncementData";
 
 interface AnnouncementContextType {
   mosqueDetails: MosqueDetails[];
+  filteredMosqueDetails: MosqueDetails[];
   subscribe: (id: number) => void;
+  searchMosque: (mosqueName: string) => void;
 }
 
 const AnnouncementContext = createContext<AnnouncementContextType | undefined>(
@@ -17,6 +19,9 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
     {
       id: 1,
       mosque: "Al-Nour Mosque",
+      picture: require("../../assets/al_nour.jpg"),
+      description:
+        "The Al-Nour Mosque (Arabic: مسجد النور) is a mosque in Abbassia, Cairo, Egypt. It is among the landmarks of the neighborhood and the largest mosques in the city with several different halls for multi-purposes. It conducts social activities and sporting events as well. The mosque contains other facilities such as library. ",
       mosqueLat: 40.748817,
       mosqueLong: -73.985428,
       announcement: [
@@ -32,6 +37,9 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
     {
       id: 2,
       mosque: "Al-Huda Mosque",
+      picture: require("../../assets/al_nour.jpg"),
+      description:
+        "The Al-Nour Mosque (Arabic: مسجد النور) is a mosque in Abbassia, Cairo, Egypt. It is among the landmarks of the neighborhood and the largest mosques in the city with several different halls for multi-purposes. It conducts social activities and sporting events as well. The mosque contains other facilities such as library. ",
       mosqueLat: 40.73061,
       mosqueLong: -73.935242,
       announcement: [
@@ -51,6 +59,9 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
     {
       id: 3,
       mosque: "Al-Fajr Mosque",
+      picture: require("../../assets/al_nour.jpg"),
+      description:
+        "The Al-Nour Mosque (Arabic: مسجد النور) is a mosque in Abbassia, Cairo, Egypt. It is among the landmarks of the neighborhood and the largest mosques in the city with several different halls for multi-purposes. It conducts social activities and sporting events as well. The mosque contains other facilities such as library. ",
       mosqueLat: 40.712776,
       mosqueLong: -74.005974,
       announcement: [
@@ -66,6 +77,9 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
     {
       id: 4,
       mosque: "Al-Ikhlas Mosque",
+      picture: require("../../assets/al_nour.jpg"),
+      description:
+        "The Al-Nour Mosque (Arabic: مسجد النور) is a mosque in Abbassia, Cairo, Egypt. It is among the landmarks of the neighborhood and the largest mosques in the city with several different halls for multi-purposes. It conducts social activities and sporting events as well. The mosque contains other facilities such as library. ",
       mosqueLat: 40.758896,
       mosqueLong: -73.98513,
       announcement: [
@@ -96,9 +110,31 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
     );
   };
 
+  const [filteredMosqueDetails, setFilteredMosqueDetails] =
+    useState<MosqueDetails[]>(mosqueDetails);
+
+  const searchMosque = (mosqueName: string) => {
+    if (mosqueName.trim() === "") {
+      // Reset to original mosque details if search is empty
+      setFilteredMosqueDetails(mosqueDetails);
+    } else {
+      // Filter mosques based on the search keyword
+      setFilteredMosqueDetails(
+        mosqueDetails.filter((mosque) =>
+          mosque.mosque.toLowerCase().includes(mosqueName.toLowerCase())
+        )
+      );
+    }
+  };
+
   return (
     <AnnouncementContext.Provider
-      value={{ mosqueDetails, subscribe: subscribeToMosque }}
+      value={{
+        mosqueDetails,
+        filteredMosqueDetails,
+        subscribe: subscribeToMosque,
+        searchMosque,
+      }}
     >
       {children}
     </AnnouncementContext.Provider>

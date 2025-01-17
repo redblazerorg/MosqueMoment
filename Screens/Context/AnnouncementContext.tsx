@@ -108,6 +108,13 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
           : mosque
       )
     );
+    setFilteredMosqueDetails((prevDetails) =>
+      prevDetails.map((mosque) =>
+        mosque.id === id
+          ? { ...mosque, isSubscribe: !mosque.isSubscribe }
+          : mosque
+      )
+    );
   };
 
   const [filteredMosqueDetails, setFilteredMosqueDetails] =

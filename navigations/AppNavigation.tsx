@@ -12,6 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MosqueAvailable from "../Screens/Announcement/MosqueAvailable/MosqueAvailable";
 import { AnnouncementProvider } from "../Screens/Context/AnnouncementContext";
 import { ViewStyle } from "react-native";
+import MosqueDetail from "../Screens/Announcement/MosqueAvailable/MosqueDetail";
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -26,6 +27,11 @@ export type RootTabParamList = {
 export type AnnouncementStackParamList = {
   AnnouncementMain: undefined;
   MosqueAvailable: undefined;
+  MosqueDetail: {
+    latitude: number;
+    longitude: number;
+    mosqueName: string;
+  };
 };
 
 // Create the stack and tab navigators
@@ -49,6 +55,11 @@ const AnnouncementNavigator = () => {
         <AnnouncementStack.Screen
           name="MosqueAvailable"
           component={MosqueAvailable}
+          options={{ headerShown: false }}
+        />
+        <AnnouncementStack.Screen
+          name="MosqueDetail"
+          component={MosqueDetail}
           options={{ headerShown: false }}
         />
       </AnnouncementStack.Navigator>
@@ -82,7 +93,8 @@ const TabNavigator = () => {
         tabBarInactiveTintColor: "#999999",
         tabBarStyle: ((route) => {
           const routeName = getFocusedRouteNameFromRoute(route);
-          return routeName === "MosqueAvailable"
+          const hiddenRoutes = ["MosqueAvailable", "MosqueDetail"];
+          return hiddenRoutes.includes(routeName || "")
             ? { display: "none" }
             : tabBarStyle;
         })(route),
@@ -104,7 +116,7 @@ const TabNavigator = () => {
         options={{
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="megaphone" color={color} size={size} />
+            <Ionicons name="notifications" color={color} size={size} />
           ),
         }}
       />

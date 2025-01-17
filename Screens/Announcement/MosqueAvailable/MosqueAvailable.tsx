@@ -6,15 +6,21 @@ import {
   ScrollView,
   Dimensions,
   TextInput,
+  TouchableOpacity,
 } from "react-native";
 import React, { useState } from "react";
 import { useAnnouncements } from "../../Context/AnnouncementContext";
 import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
+import { AnnouncementStackParamList } from "../../../navigations/AppNavigation";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
+type NavigationProp = NativeStackNavigationProp<AnnouncementStackParamList>;
 
 const MosqueAvailable = () => {
-  const { mosqueDetails, filteredMosqueDetails, searchMosque } =
-    useAnnouncements();
+  const { subscribe, filteredMosqueDetails, searchMosque } = useAnnouncements();
   const width = Dimensions.get("window").width;
+  const navigation = useNavigation<NavigationProp>();
 
   const [searchKeyword, setSearchKeyword] = useState("");
 
@@ -47,58 +53,85 @@ const MosqueAvailable = () => {
       />
       <ScrollView showsVerticalScrollIndicator={false}>
         {filteredMosqueDetails.map((mosque, index) => (
-          <View
+          <TouchableOpacity
             key={index}
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: 8,
-              padding: 10,
-              marginVertical: 8,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
+            onPress={() => {
+              navigation.navigate("MosqueDetail", {
+                latitude: mosque.mosqueLat,
+                longitude: mosque.mosqueLong,
+                mosqueName: mosque.mosque,
+              });
             }}
           >
             <View
               style={{
-                display: "flex",
-                flexDirection: "row",
+                backgroundColor: "#fff",
+                borderRadius: 8,
+                padding: 10,
+                marginVertical: 8,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
               }}
             >
-              <View style={{ flex: 1 }}>
-                <Text
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      color: "#333",
+                      marginBottom: 5,
+                    }}
+                  >
+                    {mosque.mosque}
+                  </Text>
+                  <Text numberOfLines={6}>{mosque.description}</Text>
+                </View>
+                <Image
+                  source={mosque.picture}
                   style={{
-                    fontSize: 16,
-                    fontWeight: "bold",
-                    color: "#333",
-                    marginBottom: 5,
+                    width: width * 0.4,
+                    height: 150,
+                    borderRadius: 8,
+                    marginBottom: 10,
+                  }}
+                />
+              </View>
+
+              <TouchableOpacity onPress={() => subscribe(mosque.id)}>
+                <View
+                  style={{
+                    borderRadius: 12,
+                    backgroundColor: "#66C266",
+                    width: 90,
+
+                    padding: 2,
                   }}
                 >
-                  {mosque.mosque}
-                </Text>
-                <Text numberOfLines={6}>{mosque.description}</Text>
-              </View>
-              <Image
-                source={mosque.picture}
+                  <Text style={{ textAlign: "center", color: "white" }}>
+                    {mosque.isSubscribe ? "Unsubscribe" : "Subscribe"}
+                  </Text>
+                </View>
+              </TouchableOpacity>
+
+              {/* <Text
                 style={{
-                  width: width * 0.4,
-                  height: 150,
-                  borderRadius: 8,
-                  marginBottom: 10,
+                  fontSize: 14,
+                  color: "#666",
                 }}
-              />
+              >
+                Latitude: {mosque.mosqueLat}, Longitude: {mosque.mosqueLong}
+              </Text> */}
             </View>
-            <Text
-              style={{
-                fontSize: 14,
-                color: "#666",
-              }}
-            >
-              Latitude: {mosque.mosqueLat}, Longitude: {mosque.mosqueLong}
-            </Text>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>

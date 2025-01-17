@@ -119,10 +119,8 @@ const PrayerTimes: React.FC = () => {
     <View
       style={{
         padding: 20,
-        // backgroundColor: "#f5f5f5",
         borderRadius: 10,
         marginVertical: 30,
-        marginHorizontal: 10,
       }}
     >
       <View style={{ display: "flex", alignItems: "center" }}>

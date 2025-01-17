@@ -30,22 +30,7 @@ const Home = () => {
         <ImageBackground source={require("../../assets/mosque_background.jpg")}>
           <PrayerTimes />
         </ImageBackground>
-        <View
-          style={{
-            width: width * 1,
-          }}
-        >
-          <View
-            style={{
-              borderRadius: 12,
-              height: 300,
-              backgroundColor: "whitesmoke",
-              margin: 10,
-            }}
-          >
-            <PrayerTimesDisplay />
-          </View>
-        </View>
+        <PrayerTimesDisplay />
       </LinearGradient>
     </View>
   );

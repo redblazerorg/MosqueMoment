@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Dimensions } from "react-native";
 import prayerSchedule from "../Model/PrayerTimeData";
 
 const PrayerTimesDisplay = () => {
@@ -14,6 +14,8 @@ const PrayerTimesDisplay = () => {
       hour12: true,
     });
   };
+
+  const height = Dimensions.get("window").height;
 
   // Function to check if current time is within 15 minutes of prayer time
   const isCurrentPrayer = (timeStr: string) => {
@@ -38,7 +40,7 @@ const PrayerTimesDisplay = () => {
     <View
       style={{
         margin: 10,
-        // height: 200,
+        height: height * 0.35,
         backgroundColor: "white",
         borderRadius: 12,
         padding: 16,
@@ -54,80 +56,82 @@ const PrayerTimesDisplay = () => {
         // height: 200,
       }}
     >
-      {Object.entries(prayerSchedule).map(([key, time], index, array) => (
-        <View
-          key={key}
-          style={[
-            {
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              // paddingVertical: 12,
-              paddingBottom: 5,
-            },
-            index !== array.length - 1 && {
-              // borderBottomWidth: 1,
-              borderBottomColor: "#f0f0f0",
-            },
-          ]}
-        >
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {Object.entries(prayerSchedule).map(([key, time], index, array) => (
           <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-            }}
+            key={key}
+            style={[
+              {
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                // paddingVertical: 12,
+                paddingBottom: 5,
+              },
+              index !== array.length - 1 && {
+                // borderBottomWidth: 1,
+                borderBottomColor: "#f0f0f0",
+              },
+            ]}
           >
-            <View
-              style={[
-                {
-                  width: 16,
-                  height: 16,
-                  borderRadius: 8,
-                  borderWidth: 2,
-                  borderColor: "#e0e0e0",
-                  marginRight: 12,
-                },
-                isCurrentPrayer(time) && {
-                  backgroundColor: "#22c55e",
-                  borderColor: "#22c55e",
-                },
-              ]}
-            />
             <View
               style={{
-                marginLeft: 4,
+                flexDirection: "row",
+                alignItems: "center",
               }}
             >
-              <Text
+              <View
+                style={[
+                  {
+                    width: 16,
+                    height: 16,
+                    borderRadius: 8,
+                    borderWidth: 2,
+                    borderColor: "#e0e0e0",
+                    marginRight: 12,
+                  },
+                  isCurrentPrayer(time) && {
+                    backgroundColor: "#22c55e",
+                    borderColor: "#22c55e",
+                  },
+                ]}
+              />
+              <View
                 style={{
-                  fontSize: 16,
-                  fontWeight: "500",
-                  color: "#333",
+                  marginLeft: 4,
                 }}
               >
-                {prayerNames[key as keyof typeof prayerNames]}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: "#666",
-                  marginTop: 2,
-                }}
-              >
-                {isCurrentPrayer(time) ? "Adhan Al Hossaini" : "Sound off"}
-              </Text>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "500",
+                    color: "#333",
+                  }}
+                >
+                  {prayerNames[key as keyof typeof prayerNames]}
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: "#666",
+                    marginTop: 2,
+                  }}
+                >
+                  {isCurrentPrayer(time) ? "Adhan Al Hossaini" : "Sound off"}
+                </Text>
+              </View>
             </View>
+            <Text
+              style={{
+                fontSize: 14,
+                color: "#666",
+              }}
+            >
+              {formatTime(time)}
+            </Text>
           </View>
-          <Text
-            style={{
-              fontSize: 14,
-              color: "#666",
-            }}
-          >
-            {formatTime(time)}
-          </Text>
-        </View>
-      ))}
+        ))}
+      </ScrollView>
     </View>
   );
 };

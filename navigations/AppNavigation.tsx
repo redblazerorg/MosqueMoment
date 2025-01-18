@@ -13,6 +13,8 @@ import MosqueAvailable from "../Screens/Announcement/MosqueAvailable/MosqueAvail
 import { AnnouncementProvider } from "../Screens/Context/AnnouncementContext";
 import { ViewStyle } from "react-native";
 import MosqueDetail from "../Screens/Announcement/MosqueAvailable/MosqueDetail";
+import MosqueDetails from "../Screens/Model/AnnouncementData";
+import QiblaCompass from "../Screens/Qibla/QiblaDirection";
 
 export type RootStackParamList = {
   Splash: undefined;
@@ -22,15 +24,14 @@ export type RootStackParamList = {
 export type RootTabParamList = {
   Home: undefined;
   Announcement: undefined;
+  Qibla: undefined;
 };
 
 export type AnnouncementStackParamList = {
   AnnouncementMain: undefined;
   MosqueAvailable: undefined;
   MosqueDetail: {
-    latitude: number;
-    longitude: number;
-    mosqueName: string;
+    mosqueSelected: MosqueDetails;
   };
 };
 
@@ -117,6 +118,16 @@ const TabNavigator = () => {
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="notifications" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Qibla"
+        component={QiblaCompass}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="compass" color={color} size={size} />
           ),
         }}
       />

@@ -53,27 +53,25 @@ const MosqueAvailable = () => {
       />
       <ScrollView showsVerticalScrollIndicator={false}>
         {filteredMosqueDetails.map((mosque, index) => (
-          <TouchableOpacity
+          <View
             key={index}
-            onPress={() => {
-              navigation.navigate("MosqueDetail", {
-                latitude: mosque.mosqueLat,
-                longitude: mosque.mosqueLong,
-                mosqueName: mosque.mosque,
-              });
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 8,
+              padding: 10,
+              marginVertical: 8,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 3,
             }}
           >
-            <View
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: 8,
-                padding: 10,
-                marginVertical: 8,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("MosqueDetail", {
+                  mosqueSelected: mosque,
+                });
               }}
             >
               <View
@@ -130,8 +128,8 @@ const MosqueAvailable = () => {
               >
                 Latitude: {mosque.mosqueLat}, Longitude: {mosque.mosqueLong}
               </Text> */}
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
         ))}
       </ScrollView>
     </View>

@@ -126,7 +126,7 @@ const MosqueDetail = () => {
             color: "#009688",
           }}
         >
-          Deskripsi
+          Description
         </Text>
         <Text
           style={{

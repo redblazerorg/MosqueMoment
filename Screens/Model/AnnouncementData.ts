@@ -6,6 +6,13 @@ interface Announcement {
   description: string;
 }
 
+export interface Activity {
+  title: string;
+  date: Date;
+  startTime: string;
+  endTime: string;
+}
+
 interface MosqueDetails {
   id: number;
   mosque: string;
@@ -14,6 +21,7 @@ interface MosqueDetails {
   mosqueLat: number;
   mosqueLong: number;
   announcement: Announcement[];
+  activity: Activity[];
   isSubscribe: boolean;
 }
 

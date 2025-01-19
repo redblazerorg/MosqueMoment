@@ -18,12 +18,12 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
   const [mosqueDetails, setMosqueDetails] = useState<MosqueDetails[]>([
     {
       id: 1,
-      mosque: "Al-Nour Mosque",
-      picture: require("../../assets/al_nour.jpg"),
+      mosque: "Masjid Sultan Salahuddin Abdul Aziz Shah",
+      picture: require("../../assets/images/masjid_sultan_salahuddin.png"),
       description:
-        "The Al-Nour Mosque (Arabic: مسجد النور) is a mosque in Abbassia, Cairo, Egypt. It is among the landmarks of the neighborhood and the largest mosques in the city with several different halls for multi-purposes. It conducts social activities and sporting events as well. The mosque contains other facilities such as library. ",
-      mosqueLat: 40.748817,
-      mosqueLong: -73.985428,
+        "Masjid Sultan Salahuddin Abdul Aziz Shah, also known as the Blue Mosque, is the state mosque of Selangor, located in Shah Alam, Malaysia. It is one of the largest mosques in Southeast Asia, featuring a stunning blue dome and intricate Islamic architecture. The mosque hosts daily prayers, community events, and educational programs.",
+      mosqueLat: 3.078159,
+      mosqueLong: 101.518303,
       announcement: [
         {
           title: "Prayer Timings Update",
@@ -31,17 +31,31 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
           description:
             "The prayer timings for the month of January have been updated.",
         },
+        {
+          title: "Weekly Quran Recitation",
+          date: new Date("2025-01-19T19:00:00Z"),
+          description:
+            "Join us for weekly Quran recitation sessions every Thursday night.",
+        },
+      ],
+      activity: [
+        {
+          title: "Kuliah Maghrib",
+          date: new Date("2025-01-16T08:00:00Z"),
+          startTime: "07:30 PM",
+          endTime: "08:30 PM",
+        },
       ],
       isSubscribe: true,
     },
     {
       id: 2,
-      mosque: "Al-Huda Mosque",
-      picture: require("../../assets/al_nour.jpg"),
+      mosque: "Masjid Al-Ikhlas, Seksyen 13",
+      picture: require("../../assets/images/masjid_al_ikhlas.jpg"),
       description:
-        "The Al-Nour Mosque (Arabic: مسجد النور) is a mosque in Abbassia, Cairo, Egypt. It is among the landmarks of the neighborhood and the largest mosques in the city with several different halls for multi-purposes. It conducts social activities and sporting events as well. The mosque contains other facilities such as library. ",
-      mosqueLat: 40.73061,
-      mosqueLong: -73.935242,
+        "Masjid Al-Ikhlas is a prominent mosque located in Seksyen 13, Shah Alam. Known for its vibrant community programs, the mosque serves as a center for Islamic education and social activities for the surrounding neighborhoods.",
+      mosqueLat: 3.079234,
+      mosqueLong: 101.529012,
       announcement: [
         {
           title: "Community Event",
@@ -51,49 +65,54 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
         {
           title: "Charity Fundraiser",
           date: new Date("2025-01-18T14:00:00Z"),
-          description: "We are hosting a fundraiser for the local orphanage.",
+          description:
+            "We are hosting a fundraiser for underprivileged families in the area.",
         },
       ],
+      activity: [],
       isSubscribe: false,
     },
     {
       id: 3,
-      mosque: "Al-Fajr Mosque",
-      picture: require("../../assets/al_nour.jpg"),
+      mosque: "Masjid Al-Wathiqu Billah",
+      picture: require("../../assets/images/masjid_al_watique.jpg"),
       description:
-        "The Al-Nour Mosque (Arabic: مسجد النور) is a mosque in Abbassia, Cairo, Egypt. It is among the landmarks of the neighborhood and the largest mosques in the city with several different halls for multi-purposes. It conducts social activities and sporting events as well. The mosque contains other facilities such as library. ",
-      mosqueLat: 40.712776,
-      mosqueLong: -74.005974,
+        "Masjid Al-Wathiqu Billah Tuanku Mizan Zainal Abidin, commonly known as Masjid UiTM, is the central mosque of Universiti Teknologi MARA (UiTM) in Shah Alam, Selangor, Malaysia.",
+      mosqueLat: 3.073764,
+      mosqueLong: 101.519791,
       announcement: [
         {
           title: "Weekly Sermon",
           date: new Date("2025-01-19T11:00:00Z"),
           description:
-            "This week’s sermon will focus on patience and perseverance.",
+            "This week’s sermon will focus on strengthening family ties.",
         },
       ],
+      activity: [],
       isSubscribe: true,
     },
     {
       id: 4,
-      mosque: "Al-Ikhlas Mosque",
-      picture: require("../../assets/al_nour.jpg"),
+      mosque: "Masjid Al-Falah, Seksyen 7",
+      picture: require("../../assets/images/masjid_al_falah.jpg"),
       description:
-        "The Al-Nour Mosque (Arabic: مسجد النور) is a mosque in Abbassia, Cairo, Egypt. It is among the landmarks of the neighborhood and the largest mosques in the city with several different halls for multi-purposes. It conducts social activities and sporting events as well. The mosque contains other facilities such as library. ",
-      mosqueLat: 40.758896,
-      mosqueLong: -73.98513,
+        "Masjid Al-Falah is located in Seksyen 7, Shah Alam, serving the local community with daily prayers, religious talks, and educational programs. The mosque also organizes youth-focused events and charitable activities.",
+      mosqueLat: 3.058527,
+      mosqueLong: 101.503607,
       announcement: [
-        {
-          title: "New Year's Eve Prayer",
-          date: new Date("2025-01-31T23:00:00Z"),
-          description:
-            "Join us for a special prayer session to welcome the new year.",
-        },
         {
           title: "Ramadan Preparation",
           date: new Date("2025-02-01T15:00:00Z"),
           description:
             "We are organizing a series of events in preparation for Ramadan.",
+        },
+      ],
+      activity: [
+        {
+          title: "Kuliah Maghrib",
+          date: new Date("2025-02-01T15:00:00Z"),
+          startTime: "07:30 PM",
+          endTime: "08:00 PM",
         },
       ],
       isSubscribe: false,

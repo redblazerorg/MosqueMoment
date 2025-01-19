@@ -16,6 +16,7 @@ import {
   AnnouncementStackParamList,
   RootStackParamList,
 } from "../../navigations/AppNavigation";
+import ActivityTable from "./MosqueAvailable/ActivityTable";
 
 type NavigationProp = NativeStackNavigationProp<AnnouncementStackParamList>;
 
@@ -46,12 +47,20 @@ const Announcement = () => {
         ) : (
           subscribedMosques.map((mosque) => (
             <View key={mosque.id} style={{ marginBottom: 20 }}>
-              <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+              <Text
+                style={{ fontSize: 20, marginBottom: 10, fontWeight: "bold" }}
+              >
                 {mosque.mosque}
               </Text>
               {mosque.announcement.map((announcement, index) => (
                 <View key={index} style={{ marginBottom: 10 }}>
-                  <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: "bold",
+                      marginBottom: 5,
+                    }}
+                  >
                     {announcement.title}
                   </Text>
                   <Text style={{ fontSize: 14, color: "gray" }}>
@@ -61,8 +70,29 @@ const Announcement = () => {
                   <Text style={{ fontSize: 14 }}>
                     {announcement.description}
                   </Text>
+                  <View
+                    style={{
+                      marginTop: 5,
+                      height: 2,
+                      backgroundColor: "rgb(209, 209, 209)",
+                    }}
+                  ></View>
                 </View>
               ))}
+              {mosque.activity.length !== 0 && (
+                <View>
+                  <Text
+                    style={{
+                      marginTop: 5,
+                      fontSize: 14,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    Activities
+                  </Text>
+                  <ActivityTable activities={mosque.activity} />
+                </View>
+              )}
             </View>
           ))
         )}

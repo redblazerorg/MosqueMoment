@@ -75,63 +75,73 @@ const QiblaCompass: React.FC = () => {
     qiblaAngle !== null ? (qiblaAngle - phoneHeading + 360) % 360 : 0;
 
   return (
-    <View style={styles.container}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       {qiblaAngle !== null ? (
         <>
-          <Text style={styles.text}>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "bold",
+              marginBottom: 20,
+            }}
+          >
             Qibla Direction: {qiblaAngle.toFixed(2)}°
           </Text>
-          <View style={styles.compass}>
+          <View
+            style={{
+              width: 200,
+              height: 200,
+              justifyContent: "center",
+              alignItems: "center",
+              borderRadius: 100,
+              borderWidth: 2,
+              borderColor: "green",
+              backgroundColor: "#fff",
+            }}
+          >
             <Image
-              source={require("../../assets/arrow.webp")} // Replace with your arrow image
+              source={require("../../assets/arrow_2.jpg")} // Replace with your arrow image
               style={[
-                styles.arrow,
+                {
+                  width: 100,
+                  height: 100,
+                  resizeMode: "contain",
+                },
                 { transform: [{ rotate: `${rotation}deg` }] },
               ]}
             />
           </View>
         </>
       ) : errorMessage ? (
-        <Text style={styles.errorText}>{errorMessage}</Text>
+        <Text
+          style={{
+            fontSize: 16,
+            color: "red",
+            textAlign: "center",
+            marginHorizontal: 20,
+          }}
+        >
+          {errorMessage}
+        </Text>
       ) : (
-        <Text style={styles.text}>Calculating Qibla Direction...</Text>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: "bold",
+            marginBottom: 20,
+          }}
+        >
+          Calculating Qibla Direction...
+        </Text>
       )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#fff",
-  },
-  text: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
-  errorText: {
-    fontSize: 16,
-    color: "red",
-    textAlign: "center",
-    marginHorizontal: 20,
-  },
-  compass: {
-    width: 200,
-    height: 200,
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 100,
-    borderWidth: 2,
-    borderColor: "#000",
-  },
-  arrow: {
-    width: 100,
-    height: 100,
-    resizeMode: "contain",
-  },
-});
 
 export default QiblaCompass;

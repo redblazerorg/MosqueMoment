@@ -1,5 +1,4 @@
-import React, { useState, useRef } from "react";
-
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -9,7 +8,6 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from "react-native";
-
 import { useAnnouncements } from "../Context/AnnouncementContext";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -17,8 +15,10 @@ import {
   AnnouncementStackParamList,
   RootStackParamList,
 } from "../../navigations/AppNavigation";
-import ActivityTable from "./MosqueAvailable/ActivityTable";
+// import ActivityTable from "./MosqueAvailable/ActivityTable";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ActivityTable from "./MosqueAvailable/ActivityTable";
+import { Activity } from "../Model/AnnouncementData"; // Import the Activity type from your model
 
 type NavigationProp = NativeStackNavigationProp<AnnouncementStackParamList>;
 
@@ -30,10 +30,26 @@ const Announcement = () => {
   const lastScrollY = useRef(0);
   const [isButtonVisible, setIsButtonVisible] = useState(false);
 
-  // Filter the mosques where isSubscribe is true
-  const subscribedMosques = mosqueDetails.filter(
-    (mosque) => mosque.isSubscribe
-  );
+  // Convert the activity data to match the expected type
+  const convertActivity = (activity: any): Activity => {
+    return {
+      id: activity.id || Date.now(), // Generate an ID if not provided
+      mosqueName: activity.mosqueName || "", // Add mosque name
+      activityName: activity.title || activity.activityName, // Handle both old and new property names
+      date: new Date(activity.date),
+      startTime: activity.startTime,
+      endTime: activity.endTime,
+      createdAt: activity.createdAt || new Date(), // Add creation date
+    };
+  };
+
+  // Filter subscribed mosques and convert activities
+  const subscribedMosques = mosqueDetails
+    .filter((mosque) => mosque.isSubscribe)
+    .map((mosque) => ({
+      ...mosque,
+      activity: mosque.activities?.map(convertActivity) || [], // Convert activities to match expected type
+    }));
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const currentScrollY = event.nativeEvent.contentOffset.y;
@@ -94,7 +110,32 @@ const Announcement = () => {
           </Text>
 
           {subscribedMosques.length === 0 ? (
-            <Text>No subscribed mosques available.</Text>
+            <View>
+              <Text>No subscribed mosques available.</Text>
+              <View
+                style={{
+                  backgroundColor: "#66C266",
+                  borderRadius: 12,
+                  padding: 10,
+                  width: 100,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    navigation.navigate("MosqueAvailable");
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "white",
+                      textAlign: "center",
+                    }}
+                  >
+                    Mosque
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           ) : (
             subscribedMosques.map((mosque) => (
               <View key={mosque.id} style={{ marginBottom: 20 }}>

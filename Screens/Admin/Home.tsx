@@ -10,9 +10,9 @@ import {
 } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
-import PrayerTimes from "./PrayerTime";
+import PrayerTimes from "../Home/PrayerTime";
 import { LinearGradient } from "expo-linear-gradient";
-import PrayerTimesDisplay from "./AllPrayerTime";
+import PrayerTimesDisplay from "../Home/AllPrayerTime";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -83,6 +83,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#006400',
+  },
+  adminText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 20,
   },
 });
 

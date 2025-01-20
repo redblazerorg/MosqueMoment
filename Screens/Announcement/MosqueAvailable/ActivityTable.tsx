@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, FlatList } from "react-native";
-import { Activity } from "../../Model/AnnouncementData";
+import { Activity } from "../../Context/AnnouncementContext";
+// import { Activity } from "../../Model/AnnouncementData";
 
 interface Props {
   activities: Activity[]; // Define a prop type for the activities array
@@ -17,7 +18,7 @@ const ActivityTable: React.FC<Props> = ({ activities }) => {
       </View>
       {activities.map((item, index) => (
         <View key={index} style={styles.row}>
-          <Text style={styles.cell}>{item.title}</Text>
+          <Text style={styles.cell}>{item.activityName}</Text>
           <Text style={styles.cell}>{item.date.toDateString()}</Text>
           <Text style={styles.cell}>{item.startTime}</Text>
           <Text style={styles.cell}>{item.endTime}</Text>

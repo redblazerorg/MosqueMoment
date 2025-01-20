@@ -12,8 +12,9 @@ import {
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { RouteProp, useRoute } from "@react-navigation/native";
-import MosqueDetails from "../../Model/AnnouncementData";
+// import MosqueDetails from "../../Model/AnnouncementData";
 import { format } from "date-fns";
+import { MosqueDetails } from "../../Context/AnnouncementContext";
 
 type MosqueDetailParams = {
   mosqueSelected: MosqueDetails;
@@ -148,7 +149,7 @@ const MosqueDetail = () => {
       {activeTab === "activities" ? (
         <View style={styles.section}>
           {activities && activities.length > 0 ? (
-            activities.map((activity, index) => (
+            activities.map((activity: any, index: any) => (
               <View key={index} style={styles.activityCard}>
                 <Text style={styles.activityTitle}>
                   {activity.activityName}
@@ -168,7 +169,7 @@ const MosqueDetail = () => {
       ) : (
         <View style={styles.section}>
           {announcement && announcement.length > 0 ? (
-            announcement.map((item, index) => (
+            announcement.map((item: any, index: any) => (
               <View key={index} style={styles.announcementCard}>
                 <Text style={styles.announcementTitle}>{item.title}</Text>
                 <Text style={styles.announcementDate}>

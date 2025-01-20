@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
-import { useAnnouncements } from "../Context/AnnouncementContext";
+import { Activity, useAnnouncements } from "../Context/AnnouncementContext";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import {
@@ -14,7 +14,7 @@ import {
   RootStackParamList,
 } from "../../navigations/AppNavigation";
 import ActivityTable from "./MosqueAvailable/ActivityTable";
-import { Activity } from "../Model/AnnouncementData"; // Import the Activity type from your model
+// import { Activity } from "../Model/AnnouncementData"; // Import the Activity type from your model
 
 type NavigationProp = NativeStackNavigationProp<AnnouncementStackParamList>;
 
@@ -27,6 +27,8 @@ const Announcement = () => {
   const convertActivity = (activity: any): Activity => {
     return {
       id: activity.id || Date.now(), // Generate an ID if not provided
+      // title: activity.title,
+      // description: activity.second,
       mosqueName: activity.mosqueName || "", // Add mosque name
       activityName: activity.title || activity.activityName, // Handle both old and new property names
       date: new Date(activity.date),

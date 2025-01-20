@@ -9,7 +9,10 @@ import { ViewStyle, ActivityIndicator, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import { useAuth } from "../Screens/Context/AuthContext";
-import { AnnouncementProvider } from "../Screens/Context/AnnouncementContext";
+import {
+  AnnouncementProvider,
+  MosqueDetails,
+} from "../Screens/Context/AnnouncementContext";
 
 import HomeAdmin from "../Screens/Admin/Home";
 import ActivityAdmin from "../Screens/Admin/ActivityAdmin";
@@ -20,7 +23,7 @@ import Splash from "../Screens/Splash";
 import Announcement from "../Screens/Announcement/Announcement";
 import MosqueAvailable from "../Screens/Announcement/MosqueAvailable/MosqueAvailable";
 import MosqueDetail from "../Screens/Announcement/MosqueAvailable/MosqueDetail";
-import MosqueDetails from "../Screens/Model/AnnouncementData";
+// import MosqueDetails from "../Screens/Model/AnnouncementData";
 import QiblaCompass from "../Screens/Qibla/QiblaDirection";
 import SignIn from "../Screens/Auth/SignIn";
 import SignUp from "../Screens/Auth/SignUp";
@@ -65,7 +68,7 @@ const AdminTab = createBottomTabNavigator<RootAdminTabParamList>();
 const ProfileWithAnnouncement = ({ navigation }: { navigation: any }) => {
   return (
     <AnnouncementProvider>
-      <Profile navigation={navigation}/>
+      <Profile navigation={navigation} />
     </AnnouncementProvider>
   );
 };
@@ -82,20 +85,20 @@ const ActivityAdminWithAnnouncement = () => {
 const AnnouncementStack =
   createNativeStackNavigator<AnnouncementStackParamList>();
 
-  // Create Announcement Stack Navigator for Admin
-  const AnnouncementNavigatorAdmin = () => {
-    return (
-      <AnnouncementProvider>
-        <AnnouncementStack.Navigator>
-          <AnnouncementStack.Screen
-            name="AnnouncementMain"
-            component={AnnouncementAdmin}
-            options={{ headerShown: false }}
-          />
-        </AnnouncementStack.Navigator>
-      </AnnouncementProvider>
-    );
-  };
+// Create Announcement Stack Navigator for Admin
+const AnnouncementNavigatorAdmin = () => {
+  return (
+    <AnnouncementProvider>
+      <AnnouncementStack.Navigator>
+        <AnnouncementStack.Screen
+          name="AnnouncementMain"
+          component={AnnouncementAdmin}
+          options={{ headerShown: false }}
+        />
+      </AnnouncementStack.Navigator>
+    </AnnouncementProvider>
+  );
+};
 
 // Create Announcement Stack Navigator
 const AnnouncementNavigator = () => {
@@ -265,67 +268,67 @@ const AppNavigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-      {!isAuthenticated ? (
-        <>
-          <Stack.Screen
-            name="SignIn"
-            component={SignIn}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="SignUp"
-            component={SignUp}
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen
-            name="ForgotPassword"
-            component={ForgotPassword}
-            options={{
-              headerShown: false,
-            }}
-          />
-        </>
-      ) : (
-        <>
-          <Stack.Screen
-            name="Splash"
-            component={Splash}
-            options={{
-              headerShown: false,
-            }}
-          />
-
-          {user?.role === 'admin' ? (
+        {!isAuthenticated ? (
+          <>
             <Stack.Screen
+              name="SignIn"
+              component={SignIn}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="SignUp"
+              component={SignUp}
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="ForgotPassword"
+              component={ForgotPassword}
+              options={{
+                headerShown: false,
+              }}
+            />
+          </>
+        ) : (
+          <>
+            <Stack.Screen
+              name="Splash"
+              component={Splash}
+              options={{
+                headerShown: false,
+              }}
+            />
+
+            {user?.role === "admin" ? (
+              <Stack.Screen
                 name="AdminMain"
                 component={AdminTabNavigator}
                 options={{
                   headerShown: false,
                 }}
               />
-          ) : (
+            ) : (
+              <Stack.Screen
+                name="Main"
+                component={TabNavigator}
+                options={{
+                  headerShown: false,
+                }}
+              />
+            )}
+
             <Stack.Screen
-              name="Main"
-              component={TabNavigator}
+              name="Profile"
+              component={ProfileWithAnnouncement}
               options={{
                 headerShown: false,
               }}
             />
-          )}
-
-          <Stack.Screen
-            name="Profile"
-            component={ProfileWithAnnouncement}
-            options={{
-              headerShown: false,
-            }}
-          />
-        </>
-      )}
+          </>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );

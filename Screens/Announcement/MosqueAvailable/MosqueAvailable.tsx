@@ -9,7 +9,10 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useState } from "react";
-import { useAnnouncements, MosqueDetails } from "../../Context/AnnouncementContext";
+import {
+  useAnnouncements,
+  MosqueDetails,
+} from "../../Context/AnnouncementContext";
 import { useNavigation } from "@react-navigation/native";
 import { AnnouncementStackParamList } from "../../../navigations/AppNavigation";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -17,23 +20,24 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 type NavigationProp = NativeStackNavigationProp<AnnouncementStackParamList>;
 
 const MosqueAvailable = () => {
-  const { subscribe, filteredMosqueDetails, searchMosque, mosqueDetails } = useAnnouncements();
+  const { subscribe, filteredMosqueDetails, searchMosque, mosqueDetails } =
+    useAnnouncements();
   const width = Dimensions.get("window").width;
   const navigation = useNavigation<NavigationProp>();
 
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [searchType, setSearchType] = useState<'mosque' | 'activity'>('mosque');
+  const [searchType, setSearchType] = useState<"mosque" | "activity">("mosque");
 
   const handleSearch = (text: string) => {
     setSearchKeyword(text);
     const keyword = text.toLowerCase();
 
-    if (searchType === 'mosque') {
+    if (searchType === "mosque") {
       // Use the existing searchMosque function for mosque names
       searchMosque(text);
     } else {
       // Custom search for activities
-      searchMosque(text, 'activity');
+      searchMosque(text, "activity");
     }
   };
 
@@ -50,45 +54,51 @@ const MosqueAvailable = () => {
       <View style={styles.searchSection}>
         <TextInput
           style={styles.searchInput}
-          placeholder={`Search by ${searchType === 'mosque' ? 'mosque name' : 'activity'}...`}
+          placeholder={`Search by ${
+            searchType === "mosque" ? "mosque name" : "activity"
+          }...`}
           value={searchKeyword}
           onChangeText={handleSearch}
         />
-        
+
         {/* Search Type Toggle */}
         <View style={styles.searchTypeContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[
-              styles.searchTypeButton, 
-              searchType === 'mosque' && styles.activeSearchType
+              styles.searchTypeButton,
+              searchType === "mosque" && styles.activeSearchType,
             ]}
             onPress={() => {
-              setSearchType('mosque');
+              setSearchType("mosque");
               handleSearch(searchKeyword);
             }}
           >
-            <Text style={[
-              styles.searchTypeText,
-              searchType === 'mosque' && styles.activeSearchTypeText
-            ]}>
+            <Text
+              style={[
+                styles.searchTypeText,
+                searchType === "mosque" && styles.activeSearchTypeText,
+              ]}
+            >
               Mosque
             </Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[
-              styles.searchTypeButton, 
-              searchType === 'activity' && styles.activeSearchType
+              styles.searchTypeButton,
+              searchType === "activity" && styles.activeSearchType,
             ]}
             onPress={() => {
-              setSearchType('activity');
+              setSearchType("activity");
               handleSearch(searchKeyword);
             }}
           >
-            <Text style={[
-              styles.searchTypeText,
-              searchType === 'activity' && styles.activeSearchTypeText
-            ]}>
+            <Text
+              style={[
+                styles.searchTypeText,
+                searchType === "activity" && styles.activeSearchTypeText,
+              ]}
+            >
               Activity
             </Text>
           </TouchableOpacity>
@@ -111,27 +121,33 @@ const MosqueAvailable = () => {
                   <Text numberOfLines={6} style={styles.mosqueDescription}>
                     {mosque.description}
                   </Text>
-                  
+
                   {/* Show activities if searching by activity */}
-                  {searchType === 'activity' && mosque.activities?.some(activity => 
-                    activity.activityName.toLowerCase().includes(searchKeyword.toLowerCase())
-                  ) && (
-                    <View style={styles.activitiesContainer}>
-                      <Text style={styles.activitiesTitle}>Matching Activities:</Text>
-                      {mosque.activities
-                        .filter(activity => 
-                          activity.activityName.toLowerCase().includes(searchKeyword.toLowerCase())
-                        )
-                        .map((activity, idx) => (
-                          <Text key={idx} style={styles.activityItem}>
-                            • {activity.activityName}
-                          </Text>
-                        ))
-                      }
-                    </View>
-                  )}
+                  {searchType === "activity" &&
+                    mosque.activities?.some((activity) =>
+                      activity.activityName
+                        .toLowerCase()
+                        .includes(searchKeyword.toLowerCase())
+                    ) && (
+                      <View style={styles.activitiesContainer}>
+                        <Text style={styles.activitiesTitle}>
+                          Matching Activities:
+                        </Text>
+                        {mosque.activities
+                          .filter((activity) =>
+                            activity.activityName
+                              .toLowerCase()
+                              .includes(searchKeyword.toLowerCase())
+                          )
+                          .map((activity, idx) => (
+                            <Text key={idx} style={styles.activityItem}>
+                              • {activity.activityName}
+                            </Text>
+                          ))}
+                      </View>
+                    )}
                 </View>
-                
+
                 {mosque.picture && (
                   <Image
                     source={{ uri: mosque.picture }}
@@ -140,7 +156,7 @@ const MosqueAvailable = () => {
                 )}
               </View>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.subscribeButton}
                 onPress={() => subscribe(mosque.id)}
               >
@@ -174,25 +190,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   searchTypeContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 10,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   searchTypeButton: {
     paddingVertical: 8,
     paddingHorizontal: 16,
     marginHorizontal: 5,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   activeSearchType: {
-    backgroundColor: '#66C266',
+    backgroundColor: "#66C266",
   },
   searchTypeText: {
-    color: '#666',
+    color: "#666",
   },
   activeSearchTypeText: {
-    color: 'white',
+    color: "white",
   },
   mosqueCard: {
     backgroundColor: "#fff",
@@ -219,7 +235,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   mosqueDescription: {
-    color: '#666',
+    color: "#666",
   },
   mosqueImage: {
     width: Dimensions.get("window").width * 0.4,
@@ -229,17 +245,17 @@ const styles = StyleSheet.create({
   },
   activitiesContainer: {
     marginTop: 10,
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     padding: 10,
     borderRadius: 5,
   },
   activitiesTitle: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 5,
-    color: '#333',
+    color: "#333",
   },
   activityItem: {
-    color: '#666',
+    color: "#666",
     marginLeft: 5,
   },
   subscribeButton: {

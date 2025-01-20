@@ -40,7 +40,7 @@ const PrayerTimesDisplay = () => {
     <View
       style={{
         margin: 10,
-        height: height * 0.35,
+        // height: height * 0.35,
         backgroundColor: "white",
         borderRadius: 12,
         padding: 16,

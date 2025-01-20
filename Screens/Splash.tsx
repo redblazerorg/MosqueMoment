@@ -2,11 +2,19 @@ import React, { useEffect } from "react";
 import { View, Text, Image, ActivityIndicator, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Importing useNavigation hook
 import { LinearGradient } from "expo-linear-gradient";
+import { useAuth } from "../Screens/Context/AuthContext";
 
 const Splash = ({ navigation }: { navigation: any }) => {
+  const { user } = useAuth();
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace("Main");
+      // Check user role and navigate accordingly
+      if (user?.role === 'admin') {
+        navigation.replace("AdminMain");
+      } else {
+        navigation.replace("Main");
+      }
     }, 2000);
 
     return () => clearTimeout(timer);

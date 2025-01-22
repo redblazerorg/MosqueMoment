@@ -111,8 +111,6 @@ const Profile = ({ navigation }: { navigation: any }) => {
         updatedData.password = editedUser.password;
       }
 
-      console.log("Attempting to update user with data:", updatedData);
-
       const success = await updateUser(updatedData);
       if (success) {
         console.log("User update successful");

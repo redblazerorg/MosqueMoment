@@ -16,6 +16,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { AnnouncementStackParamList } from "../../../navigations/AppNavigation";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import MosqueTimeline from "./MosqueTimeline";
 
 type NavigationProp = NativeStackNavigationProp<AnnouncementStackParamList>;
 
@@ -165,6 +166,7 @@ const MosqueAvailable = () => {
                 </Text>
               </TouchableOpacity>
             </TouchableOpacity>
+            <MosqueTimeline mosqueDetails={filteredMosqueDetails} />
           </View>
         ))}
       </ScrollView>

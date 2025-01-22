@@ -201,10 +201,9 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
   const loadMosqueDetails = async () => {
     try {
       const storedMosques = await AsyncStorage.getItem("mosques");
-      console.log("Raw stored mosques:", storedMosques); // Add this line
+
       if (storedMosques) {
         const parsedMosques = JSON.parse(storedMosques);
-        console.log("Parsed mosques:", parsedMosques); // Add this line
 
         const mosquesWithoutImages = parsedMosques.map(
           (mosque: MosqueDetails) => {
@@ -213,7 +212,6 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
           }
         );
 
-        console.log("Setting mosque details to:", mosquesWithoutImages);
         setMosqueDetails(parsedMosques);
         setFilteredMosqueDetails(parsedMosques);
       }
@@ -321,9 +319,8 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
 
   const saveMosqueDetails = async (updatedMosques: MosqueDetails[]) => {
     try {
-      console.log("Saving mosques to AsyncStorage:", updatedMosques);
       await AsyncStorage.setItem("mosques", JSON.stringify(updatedMosques));
-      console.log("Successfully saved to AsyncStorage");
+
       setMosqueDetails(updatedMosques);
       setFilteredMosqueDetails(updatedMosques);
     } catch (error) {

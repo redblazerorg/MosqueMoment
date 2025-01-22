@@ -15,6 +15,7 @@ export type Activity = {
   mosqueName: string;
   activityName: string;
   date: Date;
+  endDate: Date;
   startTime: string;
   endTime: string;
   createdAt: Date;

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, FlatList } from "react-native";
+import { View, Text, StyleSheet, FlatList, Image } from "react-native";
 import { Activity, MosqueDetails } from "../../Context/AnnouncementContext";
 
 interface TimelineItemProps {
@@ -8,16 +8,40 @@ interface TimelineItemProps {
 }
 
 const TimelineItem: React.FC<TimelineItemProps> = ({ activity, isLast }) => {
-  const date = new Date(activity.date);
-  const day = date.getDate();
-  const month = date.toLocaleString("default", { month: "short" });
+  const startDate = new Date(activity.date);
+  const endDate = activity.endDate ? new Date(activity.endDate) : null;
+
+  const startDay = startDate.getDate();
+  const startMonth = startDate.toLocaleString("default", { month: "short" });
+
+  const endDay = endDate ? endDate.getDate() : null;
+  const endMonth = endDate
+    ? endDate.toLocaleString("default", { month: "short" })
+    : null;
 
   return (
     <View style={styles.timelineItem}>
       {/* Date Column */}
       <View style={styles.dateColumn}>
-        <Text style={styles.dayText}>{day}</Text>
-        <Text style={styles.monthText}>{month}</Text>
+        {endDate ? (
+          <>
+            {/* Display date range */}
+            <Text style={styles.dayText}>
+              {startDay}
+              {startDay !== endDay ? ` - ${endDay}` : ""}
+            </Text>
+            <Text style={styles.monthText}>
+              {startMonth} {startMonth !== endMonth && `- ${endMonth}`}
+            </Text>
+          </>
+        ) : (
+          <>
+            {/* Display single date */}
+            <Text style={styles.dayText}>{startDay}</Text>
+            <Text style={styles.monthText}>{startMonth}</Text>
+          </>
+        )}
+
         {/* Timeline dot and line */}
         <View style={styles.timelineDot} />
         {!isLast && <View style={styles.timelineLine} />}
@@ -28,6 +52,12 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ activity, isLast }) => {
         <View style={[styles.statusBadge, { backgroundColor: "#00BFA6" }]}>
           <Text style={styles.statusText}>Active</Text>
         </View>
+        {activity.picture && (
+          <Image
+            source={{ uri: activity.picture }}
+            style={styles.previewImage}
+          />
+        )}
         <Text style={styles.activityName}>{activity.activityName}</Text>
         <View style={styles.metaContainer}>
           <Text style={styles.metaText}>
@@ -44,15 +74,24 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ activity, isLast }) => {
 
 interface MosqueTimelineProps {
   mosqueDetails: MosqueDetails[];
+  searchKeyword: string;
 }
 
-const MosqueTimeline: React.FC<MosqueTimelineProps> = ({ mosqueDetails }) => {
+const MosqueTimeline: React.FC<MosqueTimelineProps> = ({
+  mosqueDetails,
+  searchKeyword,
+}) => {
   // Flatten all activities from all mosques into a single array
   const allActivities = mosqueDetails.flatMap((mosque) =>
-    mosque.activities.map((activity) => ({
-      ...activity,
-      mosqueName: mosque.mosque,
-    }))
+    mosque.activities
+      .filter(
+        (activity) =>
+          activity.activityName.toLowerCase().includes(searchKeyword) // Filter by keyword match
+      )
+      .map((activity) => ({
+        ...activity,
+        mosqueName: mosque.mosque,
+      }))
   );
 
   // Sort activities by date
@@ -83,8 +122,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginBottom: 16,
   },
+  previewImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginTop: 12,
+  },
   dateColumn: {
-    width: 50,
+    width: 60,
     alignItems: "center",
     marginRight: 16,
   },

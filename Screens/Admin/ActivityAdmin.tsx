@@ -39,11 +39,13 @@ const ActivityAdmin = () => {
 
   // Date and Time states
   const [activityDate, setActivityDate] = useState(new Date());
+  const [activityEndDate, setActivityEndDate] = useState(new Date());
   const [startTime, setStartTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
 
   // Visibility states for pickers
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [showStartClock, setShowStartClock] = useState(false);
   const [showEndClock, setShowEndClock] = useState(false);
 
@@ -62,6 +64,22 @@ const ActivityAdmin = () => {
     setShowDatePicker(Platform.OS === "ios");
     if (selectedDate) {
       setActivityDate(selectedDate);
+      // If end date is before start date, update it
+      if (activityEndDate < selectedDate) {
+        setActivityEndDate(selectedDate);
+      }
+    }
+  };
+
+  const handleEndDateChange = (event: any, selectedDate?: Date) => {
+    setShowEndDatePicker(Platform.OS === "ios");
+    if (selectedDate) {
+      // Only allow end dates that are after or equal to start date
+      if (selectedDate >= activityDate) {
+        setActivityEndDate(selectedDate);
+      } else {
+        Alert.alert("Invalid Date", "End date cannot be before start date");
+      }
     }
   };
 
@@ -109,6 +127,11 @@ const ActivityAdmin = () => {
       return;
     }
 
+    if (activityEndDate < activityDate) {
+      Alert.alert("Error", "End date cannot be before start date");
+      return;
+    }
+
     if (managedMosque) {
       try {
         const newActivity = {
@@ -122,6 +145,7 @@ const ActivityAdmin = () => {
             minute: "2-digit",
           }),
           date: activityDate,
+          endDate: activityEndDate,
           mosqueName: managedMosque.mosque,
           picture: newActivityImage,
         };
@@ -133,6 +157,7 @@ const ActivityAdmin = () => {
         setStartTime(new Date());
         setEndTime(new Date());
         setActivityDate(new Date());
+        setActivityEndDate(new Date());
         setNewActivityImage("");
         Alert.alert("Success", "Activity added successfully");
       } catch (error) {
@@ -231,7 +256,6 @@ const ActivityAdmin = () => {
                   </TouchableOpacity>
                 </View>
                 <View style={styles.activityDetails}>
-                  {/* picture here */}
                   {activity.picture && (
                     <Image
                       source={{ uri: activity.picture }}
@@ -250,7 +274,8 @@ const ActivityAdmin = () => {
                     </Text>
                   </View>
                   <Text style={styles.activityDate}>
-                    {new Date(activity.date).toLocaleDateString()}
+                    {new Date(activity.date).toLocaleDateString()} -{" "}
+                    {new Date(activity.endDate).toLocaleDateString()}
                   </Text>
                 </View>
               </View>
@@ -293,13 +318,13 @@ const ActivityAdmin = () => {
                 placeholderTextColor="#666"
               />
 
-              {/* Date Picker */}
+              {/* Start Date Picker */}
               <TouchableOpacity
                 onPress={() => setShowDatePicker(true)}
                 style={styles.input}
               >
                 <Text style={{ color: "#666" }}>
-                  {activityDate.toLocaleDateString()}
+                  Start Date: {activityDate.toLocaleDateString()}
                 </Text>
               </TouchableOpacity>
               {showDatePicker && (
@@ -309,6 +334,27 @@ const ActivityAdmin = () => {
                   mode="date"
                   display={Platform.OS === "ios" ? "spinner" : "default"}
                   onChange={handleDateChange}
+                  minimumDate={new Date()}
+                />
+              )}
+
+              {/* End Date Picker */}
+              <TouchableOpacity
+                onPress={() => setShowEndDatePicker(true)}
+                style={styles.input}
+              >
+                <Text style={{ color: "#666" }}>
+                  End Date: {activityEndDate.toLocaleDateString()}
+                </Text>
+              </TouchableOpacity>
+              {showEndDatePicker && (
+                <DateTimePicker
+                  testID="endDatePicker"
+                  value={activityEndDate}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={handleEndDateChange}
+                  minimumDate={activityDate}
                 />
               )}
 
@@ -318,6 +364,7 @@ const ActivityAdmin = () => {
                 style={styles.input}
               >
                 <Text style={{ color: "#666" }}>
+                  Start Time:{" "}
                   {startTime.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -341,6 +388,7 @@ const ActivityAdmin = () => {
                 style={styles.input}
               >
                 <Text style={{ color: "#666" }}>
+                  End Time:{" "}
                   {endTime.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",

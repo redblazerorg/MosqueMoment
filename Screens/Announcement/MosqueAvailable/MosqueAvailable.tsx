@@ -7,6 +7,7 @@ import {
   Dimensions,
   TextInput,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import React, { useState } from "react";
 import {
@@ -106,26 +107,27 @@ const MosqueAvailable = () => {
         </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {filteredMosqueDetails.map((mosque) => (
-          <View key={mosque.id} style={styles.mosqueCard}>
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        data={filteredMosqueDetails}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View key={item.id} style={styles.mosqueCard}>
             <TouchableOpacity
-              onPress={() => {
+              onPress={() =>
                 navigation.navigate("MosqueDetail", {
-                  mosqueSelected: convertMosqueForNavigation(mosque),
-                });
-              }}
+                  mosqueSelected: convertMosqueForNavigation(item),
+                })
+              }
             >
               <View style={styles.mosqueContent}>
                 <View style={styles.mosqueInfo}>
-                  <Text style={styles.mosqueName}>{mosque.mosque}</Text>
+                  <Text style={styles.mosqueName}>{item.mosque}</Text>
                   <Text numberOfLines={6} style={styles.mosqueDescription}>
-                    {mosque.description}
+                    {item.description}
                   </Text>
-
-                  {/* Show activities if searching by activity */}
                   {searchType === "activity" &&
-                    mosque.activities?.some((activity) =>
+                    item.activities?.some((activity) =>
                       activity.activityName
                         .toLowerCase()
                         .includes(searchKeyword.toLowerCase())
@@ -134,7 +136,7 @@ const MosqueAvailable = () => {
                         <Text style={styles.activitiesTitle}>
                           Matching Activities:
                         </Text>
-                        {mosque.activities
+                        {item.activities
                           .filter((activity) =>
                             activity.activityName
                               .toLowerCase()
@@ -148,28 +150,34 @@ const MosqueAvailable = () => {
                       </View>
                     )}
                 </View>
+                {/* Show activities if searching by activity */}
 
-                {mosque.picture && (
+                {item.picture && (
                   <Image
-                    source={{ uri: mosque.picture }}
+                    source={{ uri: item.picture }}
                     style={styles.mosqueImage}
                   />
                 )}
               </View>
-
               <TouchableOpacity
                 style={styles.subscribeButton}
-                onPress={() => subscribe(mosque.id)}
+                onPress={() => subscribe(item.id)}
               >
                 <Text style={styles.subscribeButtonText}>
-                  {mosque.isSubscribe ? "Unsubscribe" : "Subscribe"}
+                  {item.isSubscribe ? "Unsubscribe" : "Subscribe"}
                 </Text>
               </TouchableOpacity>
             </TouchableOpacity>
-            <MosqueTimeline mosqueDetails={filteredMosqueDetails} />
+            <View style={{ height: 10 }}></View>
+            {searchType === "activity" && (
+              <MosqueTimeline
+                mosqueDetails={[item]}
+                searchKeyword={searchKeyword.toLowerCase()}
+              />
+            )}
           </View>
-        ))}
-      </ScrollView>
+        )}
+      />
     </View>
   );
 };
@@ -263,8 +271,8 @@ const styles = StyleSheet.create({
   subscribeButton: {
     backgroundColor: "#66C266",
     borderRadius: 12,
-    width: 90,
-    padding: 2,
+    // width: 90,
+    padding: 10,
     marginTop: 10,
   },
   subscribeButtonText: {

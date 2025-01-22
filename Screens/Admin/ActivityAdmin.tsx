@@ -9,6 +9,7 @@ import {
   TextInput,
   Alert,
   Platform,
+  FlatList,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState, useEffect } from "react";
@@ -19,6 +20,7 @@ import {
   useAnnouncements,
   MosqueDetails,
   Activity,
+  MosqueActivity,
 } from "../Context/AnnouncementContext";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -48,6 +50,23 @@ const ActivityAdmin = () => {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [showStartClock, setShowStartClock] = useState(false);
   const [showEndClock, setShowEndClock] = useState(false);
+
+  const [activityType, setActivityType] = useState<MosqueActivity>(
+    MosqueActivity.ForumPerdana
+  );
+
+  const [ActivityModalVisible, setActivityModalVisible] = useState(false);
+
+  const activities = Object.values(MosqueActivity);
+
+  const toggleModal = () => {
+    setActivityModalVisible(!ActivityModalVisible);
+  };
+
+  const handleSelect = (activity: MosqueActivity) => {
+    setActivityType(activity);
+    toggleModal();
+  };
 
   const [newActivityImage, setNewActivityImage] = useState<string>("");
 
@@ -148,6 +167,7 @@ const ActivityAdmin = () => {
           endDate: activityEndDate,
           mosqueName: managedMosque.mosque,
           picture: newActivityImage,
+          activityType: activityType,
         };
 
         await addActivity(managedMosque.id, newActivity);
@@ -290,139 +310,188 @@ const ActivityAdmin = () => {
           visible={modalVisible}
           onRequestClose={() => setModalVisible(false)}
         >
-          <View style={styles.modalContainer}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>New Activity</Text>
-
-              <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
-                <Text style={styles.imageButtonText}>
-                  {newActivityImage
-                    ? "Change Activity Image"
-                    : "Pick Activity Image"}
-                </Text>
-              </TouchableOpacity>
-              {newActivityImage && (
-                <Image
-                  source={{ uri: newActivityImage }}
-                  style={styles.previewImage}
-                />
-              )}
-
-              <View style={{ height: 10 }}></View>
-
-              <TextInput
-                style={styles.input}
-                placeholder="Activity Name"
-                value={activityName}
-                onChangeText={setActivityName}
-                placeholderTextColor="#666"
-              />
-
-              {/* Start Date Picker */}
-              <TouchableOpacity
-                onPress={() => setShowDatePicker(true)}
-                style={styles.input}
-              >
-                <Text style={{ color: "#666" }}>
-                  Start Date: {activityDate.toLocaleDateString()}
-                </Text>
-              </TouchableOpacity>
-              {showDatePicker && (
-                <DateTimePicker
-                  testID="datePicker"
-                  value={activityDate}
-                  mode="date"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={handleDateChange}
-                  minimumDate={new Date()}
-                />
-              )}
-
-              {/* End Date Picker */}
-              <TouchableOpacity
-                onPress={() => setShowEndDatePicker(true)}
-                style={styles.input}
-              >
-                <Text style={{ color: "#666" }}>
-                  End Date: {activityEndDate.toLocaleDateString()}
-                </Text>
-              </TouchableOpacity>
-              {showEndDatePicker && (
-                <DateTimePicker
-                  testID="endDatePicker"
-                  value={activityEndDate}
-                  mode="date"
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={handleEndDateChange}
-                  minimumDate={activityDate}
-                />
-              )}
-
-              {/* Start Time Picker */}
-              <TouchableOpacity
-                onPress={() => setShowStartClock(true)}
-                style={styles.input}
-              >
-                <Text style={{ color: "#666" }}>
-                  Start Time:{" "}
-                  {startTime.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-              </TouchableOpacity>
-              {showStartClock && (
-                <DateTimePicker
-                  testID="startTimePicker"
-                  value={startTime}
-                  mode="time"
-                  is24Hour={false}
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={handleStartTimeChange}
-                />
-              )}
-
-              {/* End Time Picker */}
-              <TouchableOpacity
-                onPress={() => setShowEndClock(true)}
-                style={styles.input}
-              >
-                <Text style={{ color: "#666" }}>
-                  End Time:{" "}
-                  {endTime.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-              </TouchableOpacity>
-              {showEndClock && (
-                <DateTimePicker
-                  testID="endTimePicker"
-                  value={endTime}
-                  mode="time"
-                  is24Hour={false}
-                  display={Platform.OS === "ios" ? "spinner" : "default"}
-                  onChange={handleEndTimeChange}
-                />
-              )}
-
-              <View style={styles.modalButtons}>
-                <TouchableOpacity
-                  style={[styles.modalButton, { backgroundColor: "#FF3B30" }]}
-                  onPress={() => setModalVisible(false)}
-                >
-                  <Text style={styles.buttonText}>Cancel</Text>
-                </TouchableOpacity>
+          <ScrollView>
+            <View style={styles.modalContainer}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>New Activity</Text>
 
                 <TouchableOpacity
-                  style={[styles.modalButton, { backgroundColor: "#39B440" }]}
-                  onPress={handleAddActivity}
+                  style={styles.imageButton}
+                  onPress={pickImage}
                 >
-                  <Text style={styles.buttonText}>Add</Text>
+                  <Text style={styles.imageButtonText}>
+                    {newActivityImage
+                      ? "Change Activity Image"
+                      : "Pick Activity Image"}
+                  </Text>
                 </TouchableOpacity>
+                {newActivityImage && (
+                  <Image
+                    source={{ uri: newActivityImage }}
+                    style={styles.previewImage}
+                  />
+                )}
+
+                <View style={{ height: 10 }}></View>
+                <TouchableOpacity
+                  style={styles.dropdownButton}
+                  onPress={toggleModal}
+                >
+                  <Text style={styles.dropdownButtonText}>{activityType}</Text>
+                </TouchableOpacity>
+
+                {/* Modal for Dropdown */}
+                <Modal
+                  visible={ActivityModalVisible}
+                  transparent
+                  animationType="slide"
+                  onRequestClose={toggleModal}
+                >
+                  <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                      <FlatList
+                        data={activities}
+                        keyExtractor={(item) => item}
+                        renderItem={({ item }) => (
+                          <TouchableOpacity
+                            style={styles.radioOption}
+                            onPress={() => handleSelect(item)}
+                          >
+                            <View
+                              style={[
+                                styles.radioCircle,
+                                item === activityType && styles.radioSelected,
+                              ]}
+                            />
+                            <Text style={styles.radioText}>{item}</Text>
+                          </TouchableOpacity>
+                        )}
+                      />
+                      <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={toggleModal}
+                      >
+                        <Text style={styles.closeButtonText}>Close</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </Modal>
+                <View style={{ height: 10 }}></View>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Activity Name"
+                  value={activityName}
+                  onChangeText={setActivityName}
+                  placeholderTextColor="#666"
+                />
+
+                {/* Start Date Picker */}
+                <TouchableOpacity
+                  onPress={() => setShowDatePicker(true)}
+                  style={styles.input}
+                >
+                  <Text style={{ color: "#666" }}>
+                    Start Date: {activityDate.toLocaleDateString()}
+                  </Text>
+                </TouchableOpacity>
+                {showDatePicker && (
+                  <DateTimePicker
+                    testID="datePicker"
+                    value={activityDate}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={handleDateChange}
+                    minimumDate={new Date()}
+                  />
+                )}
+
+                {/* End Date Picker */}
+                <TouchableOpacity
+                  onPress={() => setShowEndDatePicker(true)}
+                  style={styles.input}
+                >
+                  <Text style={{ color: "#666" }}>
+                    End Date: {activityEndDate.toLocaleDateString()}
+                  </Text>
+                </TouchableOpacity>
+                {showEndDatePicker && (
+                  <DateTimePicker
+                    testID="endDatePicker"
+                    value={activityEndDate}
+                    mode="date"
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={handleEndDateChange}
+                    minimumDate={activityDate}
+                  />
+                )}
+
+                {/* Start Time Picker */}
+                <TouchableOpacity
+                  onPress={() => setShowStartClock(true)}
+                  style={styles.input}
+                >
+                  <Text style={{ color: "#666" }}>
+                    Start Time:{" "}
+                    {startTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+                {showStartClock && (
+                  <DateTimePicker
+                    testID="startTimePicker"
+                    value={startTime}
+                    mode="time"
+                    is24Hour={false}
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={handleStartTimeChange}
+                  />
+                )}
+
+                {/* End Time Picker */}
+                <TouchableOpacity
+                  onPress={() => setShowEndClock(true)}
+                  style={styles.input}
+                >
+                  <Text style={{ color: "#666" }}>
+                    End Time:{" "}
+                    {endTime.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </TouchableOpacity>
+                {showEndClock && (
+                  <DateTimePicker
+                    testID="endTimePicker"
+                    value={endTime}
+                    mode="time"
+                    is24Hour={false}
+                    display={Platform.OS === "ios" ? "spinner" : "default"}
+                    onChange={handleEndTimeChange}
+                  />
+                )}
+
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: "#FF3B30" }]}
+                    onPress={() => setModalVisible(false)}
+                  >
+                    <Text style={styles.buttonText}>Cancel</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalButton, { backgroundColor: "#39B440" }]}
+                    onPress={handleAddActivity}
+                  >
+                    <Text style={styles.buttonText}>Add</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
+          </ScrollView>
         </Modal>
       </LinearGradient>
     </View>
@@ -430,6 +499,46 @@ const ActivityAdmin = () => {
 };
 
 const styles = StyleSheet.create({
+  closeButton: {
+    marginTop: 20,
+    alignSelf: "center",
+    padding: 10,
+    backgroundColor: "#39B440",
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
+  radioOption: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 10,
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: "#39B440",
+    marginRight: 10,
+  },
+  radioSelected: {
+    backgroundColor: "#39B440",
+  },
+  radioText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  dropdownButton: {
+    padding: 15,
+    backgroundColor: "#39B440",
+    borderRadius: 8,
+  },
+  dropdownButtonText: {
+    color: "#fff",
+    fontSize: 16,
+  },
   container: {
     flex: 1,
   },

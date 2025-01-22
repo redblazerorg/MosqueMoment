@@ -9,6 +9,15 @@ import { useAuth } from "../Context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // import MosqueDetails from "../Model/AnnouncementData";
 
+export enum MosqueActivity {
+  ForumPerdana = "Forum Perdana",
+  Qiyamullail = "Qiyamullail",
+  MajlisIlmu = "Majlis Ilmu",
+  SolatHajat = "Solat Hajat",
+  KuliahSubuh = "Kuliah Subuh",
+  GotongRoyong = "Gotong Royong",
+}
+
 // Types for activities and announcements
 export type Activity = {
   id: number;
@@ -20,6 +29,7 @@ export type Activity = {
   endTime: string;
   createdAt: Date;
   picture: any;
+  activityType: MosqueActivity;
 };
 
 export type Announcement = {

@@ -64,7 +64,7 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ activity, isLast }) => {
             {activity.startTime} - {activity.endTime}
           </Text>
           <View style={styles.tagContainer}>
-            <Text style={styles.tagText}>Activity</Text>
+            <Text style={styles.tagText}>{activity.activityType}</Text>
           </View>
         </View>
       </View>

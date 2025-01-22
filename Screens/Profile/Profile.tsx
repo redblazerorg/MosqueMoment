@@ -10,33 +10,40 @@ import {
   TextInput,
   ScrollView,
   Image,
-  Alert
+  Alert,
 } from "react-native";
 import { ItemProfileEnum } from "../utils/enum";
-import { useAnnouncements, MosqueDetails } from '../Context/AnnouncementContext';
+import {
+  useAnnouncements,
+  MosqueDetails,
+} from "../Context/AnnouncementContext";
 import { useAuth, User } from "../Context/AuthContext";
-import * as ImagePicker from 'expo-image-picker';
-import { useFocusEffect } from '@react-navigation/native';
+import * as ImagePicker from "expo-image-picker";
+import { useFocusEffect } from "@react-navigation/native";
 
 const Profile = ({ navigation }: { navigation: any }) => {
   const width = Dimensions.get("window").width;
   const { user, logout, updateUser } = useAuth();
-  const [openFloatingProfile, setOpenFloatingProfile] = useState<boolean>(false);
+  const [openFloatingProfile, setOpenFloatingProfile] =
+    useState<boolean>(false);
   const [editedUser, setEditedUser] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    password: '',
+    name: user?.name || "",
+    email: user?.email || "",
+    password: "",
   });
-  const { addMosque, getMosqueByAdminId, updateMosque, mosqueDetails } = useAnnouncements();
-  const [managedMosque, setManagedMosque] = useState<MosqueDetails | undefined>();
+  const { addMosque, getMosqueByAdminId, updateMosque, mosqueDetails } =
+    useAnnouncements();
+  const [managedMosque, setManagedMosque] = useState<
+    MosqueDetails | undefined
+  >();
   const [isEditing, setIsEditing] = useState(false);
-  const [editedMosqueName, setEditedMosqueName] = useState('');
-  const [editedMosqueDescription, setEditedMosqueDescription] = useState('');
-  const [newMosqueImage, setNewMosqueImage] = useState<string>('');
+  const [editedMosqueName, setEditedMosqueName] = useState("");
+  const [editedMosqueDescription, setEditedMosqueDescription] = useState("");
+  const [newMosqueImage, setNewMosqueImage] = useState<string>("");
 
   useEffect(() => {
     const loadMosqueData = async () => {
-      if (user?.email && user.role === 'admin') {
+      if (user?.email && user.role === "admin") {
         const mosque = getMosqueByAdminId(user.email);
         if (mosque) {
           setManagedMosque(mosque);
@@ -52,7 +59,7 @@ const Profile = ({ navigation }: { navigation: any }) => {
   // Update editedUser when user data changes
   useEffect(() => {
     if (user) {
-      setEditedUser(prev => ({
+      setEditedUser((prev) => ({
         ...prev,
         name: user.name,
         email: user.email,
@@ -63,7 +70,7 @@ const Profile = ({ navigation }: { navigation: any }) => {
   useFocusEffect(
     React.useCallback(() => {
       const loadMosqueData = async () => {
-        if (user?.email && user.role === 'admin') {
+        if (user?.email && user.role === "admin") {
           const mosque = getMosqueByAdminId(user.email);
           if (mosque) {
             setManagedMosque(mosque);
@@ -85,14 +92,14 @@ const Profile = ({ navigation }: { navigation: any }) => {
     try {
       await logout();
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
     }
   };
 
   const handleUserSaveChanges = async () => {
     try {
       const updatedData: Partial<User> = {};
-      
+
       // Only include changed fields
       if (editedUser.name !== user?.name) {
         updatedData.name = editedUser.name;
@@ -103,29 +110,29 @@ const Profile = ({ navigation }: { navigation: any }) => {
       if (editedUser.password) {
         updatedData.password = editedUser.password;
       }
-  
+
       console.log("Attempting to update user with data:", updatedData);
-  
+
       const success = await updateUser(updatedData);
       if (success) {
         console.log("User update successful");
         setIsEditing(false);
-        Alert.alert('Success', 'Profile updated successfully');
+        Alert.alert("Success", "Profile updated successfully");
       } else {
         console.log("User update failed");
-        Alert.alert('Error', 'Failed to update profile');
+        Alert.alert("Error", "Failed to update profile");
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      Alert.alert('Error', 'Failed to update profile');
+      console.error("Error updating profile:", error);
+      Alert.alert("Error", "Failed to update profile");
     }
   };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    
-    if (status !== 'granted') {
-      Alert.alert('Sorry, we need camera roll permissions to make this work!');
+
+    if (status !== "granted") {
+      Alert.alert("Sorry, we need camera roll permissions to make this work!");
       return;
     }
 
@@ -145,79 +152,83 @@ const Profile = ({ navigation }: { navigation: any }) => {
 
   const handleStartEditing = () => {
     setIsEditing(true);
-    setEditedMosqueName(managedMosque?.mosque || '');
-    setEditedMosqueDescription(managedMosque?.description || '');
-    setNewMosqueImage('');
+    setEditedMosqueName(managedMosque?.mosque || "");
+    setEditedMosqueDescription(managedMosque?.description || "");
+    setNewMosqueImage("");
   };
 
   const handleMosqueSaveChanges = async () => {
     if (!managedMosque) return;
-  
+
     if (!editedMosqueName.trim() || !editedMosqueDescription.trim()) {
-      Alert.alert('Error', 'Please fill in all mosque details');
+      Alert.alert("Error", "Please fill in all mosque details");
       return;
     }
-  
+
     try {
       const updates: Partial<MosqueDetails> = {
         mosque: editedMosqueName,
         description: editedMosqueDescription,
       };
-  
+
       if (newMosqueImage) {
         updates.picture = newMosqueImage;
       }
-  
+
       // Get the updated mosque data directly from updateMosque
       const updatedMosque = await updateMosque(managedMosque.id, updates);
-      
+
       // Immediately update the local state with the new data
       if (updatedMosque) {
         setManagedMosque(updatedMosque);
         setEditedMosqueName(updatedMosque.mosque);
         setEditedMosqueDescription(updatedMosque.description);
       }
-      
+
       setIsEditing(false);
-      Alert.alert('Success', 'Mosque details updated successfully');
+      Alert.alert("Success", "Mosque details updated successfully");
     } catch (error) {
-      Alert.alert('Error', 'Failed to update mosque details');
+      Alert.alert("Error", "Failed to update mosque details");
     }
   };
 
   const handleAddMosque = async () => {
     if (!editedMosqueName.trim() || !editedMosqueDescription.trim()) {
-      Alert.alert('Error', 'Please fill in all mosque details');
+      Alert.alert("Error", "Please fill in all mosque details");
       return;
     }
 
     if (!newMosqueImage) {
-      Alert.alert('Error', 'Please select a mosque image');
+      Alert.alert("Error", "Please select a mosque image");
       return;
     }
 
     try {
-      await addMosque(editedMosqueName, editedMosqueDescription, newMosqueImage);
-      Alert.alert('Success', 'Mosque added successfully');
-      
+      await addMosque(
+        editedMosqueName,
+        editedMosqueDescription,
+        newMosqueImage
+      );
+      Alert.alert("Success", "Mosque added successfully");
+
       // Refresh managed mosque data
       const updatedMosque = getMosqueByAdminId(user!.email);
       setManagedMosque(updatedMosque);
-      setEditedMosqueName('');
-      setEditedMosqueDescription('');
-      setNewMosqueImage('');
+      setEditedMosqueName("");
+      setEditedMosqueDescription("");
+      setNewMosqueImage("");
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to add mosque');
+      Alert.alert("Error", error.message || "Failed to add mosque");
     }
   };
 
   const renderAdminSection = () => {
-    if (user?.role !== 'admin') return null;
+    if (user?.role !== "admin") return null;
 
     return (
       <View style={styles.adminSection}>
         <Text style={styles.sectionTitle}>Mosque Management</Text>
-        
+
         {managedMosque ? (
           <View style={styles.managedMosqueContainer}>
             {isEditing ? (
@@ -238,12 +249,14 @@ const Profile = ({ navigation }: { navigation: any }) => {
                   multiline
                   numberOfLines={4}
                 />
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.imageButton}
                   onPress={pickImage}
                 >
                   <Text style={styles.imageButtonText}>
-                    {newMosqueImage ? 'Change Mosque Image' : 'Update Mosque Image'}
+                    {newMosqueImage
+                      ? "Change Mosque Image"
+                      : "Update Mosque Image"}
                   </Text>
                 </TouchableOpacity>
                 {newMosqueImage ? (
@@ -258,13 +271,13 @@ const Profile = ({ navigation }: { navigation: any }) => {
                   />
                 ) : null}
                 <View style={styles.buttonRow}>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.button, styles.cancelButton]}
                     onPress={() => setIsEditing(false)}
                   >
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={[styles.button, styles.saveButton]}
                     onPress={handleMosqueSaveChanges}
                   >
@@ -277,14 +290,16 @@ const Profile = ({ navigation }: { navigation: any }) => {
               <>
                 <Text style={styles.mosqueTitle}>Your Managed Mosque:</Text>
                 <Text style={styles.mosqueName}>{managedMosque.mosque}</Text>
-                <Text style={styles.mosqueDescription}>{managedMosque.description}</Text>
+                <Text style={styles.mosqueDescription}>
+                  {managedMosque.description}
+                </Text>
                 {managedMosque.picture && (
                   <Image
                     source={{ uri: managedMosque.picture }}
                     style={styles.mosqueImage}
                   />
                 )}
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={styles.editButton}
                   onPress={handleStartEditing}
                 >
@@ -298,7 +313,12 @@ const Profile = ({ navigation }: { navigation: any }) => {
           <View style={styles.addMosqueContainer}>
             <Text style={styles.label}>Add New Mosque</Text>
             <TextInput
-              style={styles.input}
+              style={[
+                styles.input,
+                {
+                  marginBottom: 10,
+                },
+              ]}
               value={editedMosqueName}
               onChangeText={setEditedMosqueName}
               placeholder="Mosque Name"
@@ -311,12 +331,9 @@ const Profile = ({ navigation }: { navigation: any }) => {
               multiline
               numberOfLines={4}
             />
-            <TouchableOpacity 
-              style={styles.imageButton}
-              onPress={pickImage}
-            >
+            <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
               <Text style={styles.imageButtonText}>
-                {newMosqueImage ? 'Change Mosque Image' : 'Select Mosque Image'}
+                {newMosqueImage ? "Change Mosque Image" : "Select Mosque Image"}
               </Text>
             </TouchableOpacity>
             {newMosqueImage && (
@@ -325,7 +342,7 @@ const Profile = ({ navigation }: { navigation: any }) => {
                 style={styles.previewImage}
               />
             )}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.addButton}
               onPress={handleAddMosque}
             >
@@ -339,130 +356,139 @@ const Profile = ({ navigation }: { navigation: any }) => {
 
   return (
     <ScrollView>
-        <TouchableWithoutFeedback
+      <TouchableWithoutFeedback
         accessible={false}
         onPress={() => {
-            if (openFloatingProfile) setOpenFloatingProfile(false);
+          if (openFloatingProfile) setOpenFloatingProfile(false);
         }}
-        >
+      >
         <View style={styles.container}>
-            <View style={styles.profileHeader}>
+          <View style={styles.profileHeader}>
             <View style={styles.avatarContainer}>
-                <Ionicons name="person-circle" size={80} color="#39B440" />
+              <Ionicons name="person-circle" size={80} color="#39B440" />
             </View>
             <Text style={styles.name}>{user?.name}</Text>
             <Text style={styles.email}>{user?.email}</Text>
-            </View>
+          </View>
 
-            <View style={styles.infoContainer}>
+          <View style={styles.infoContainer}>
             <View style={styles.infoItem}>
-                <Text style={styles.label}>Name</Text>
-                {isEditing ? (
+              <Text style={styles.label}>Name</Text>
+              {isEditing ? (
                 <TextInput
-                    style={styles.input}
-                    value={editedUser.name}
-                    onChangeText={(text) => setEditedUser({ ...editedUser, name: text })}
-                    placeholder="Enter name"
+                  style={styles.input}
+                  value={editedUser.name}
+                  onChangeText={(text) =>
+                    setEditedUser({ ...editedUser, name: text })
+                  }
+                  placeholder="Enter name"
                 />
-                ) : (
+              ) : (
                 <Text style={styles.value}>{user?.name}</Text>
-                )}
+              )}
             </View>
 
             <View style={styles.infoItem}>
-                <Text style={styles.label}>Email</Text>
-                {isEditing ? (
+              <Text style={styles.label}>Email</Text>
+              {isEditing ? (
                 <TextInput
-                    style={styles.input}
-                    value={editedUser.email}
-                    onChangeText={(text) => setEditedUser({ ...editedUser, email: text })}
-                    placeholder="Enter email"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
+                  style={styles.input}
+                  value={editedUser.email}
+                  onChangeText={(text) =>
+                    setEditedUser({ ...editedUser, email: text })
+                  }
+                  placeholder="Enter email"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
                 />
-                ) : (
+              ) : (
                 <Text style={styles.value}>{user?.email}</Text>
-                )}
+              )}
             </View>
 
             <View style={styles.infoItem}>
-                <Text style={styles.label}>Password</Text>
-                {isEditing ? (
+              <Text style={styles.label}>Password</Text>
+              {isEditing ? (
                 <TextInput
-                    style={styles.input}
-                    value={editedUser.password}
-                    onChangeText={(text) => setEditedUser({ ...editedUser, password: text })}
-                    placeholder="Enter new password"
-                    secureTextEntry
+                  style={styles.input}
+                  value={editedUser.password}
+                  onChangeText={(text) =>
+                    setEditedUser({ ...editedUser, password: text })
+                  }
+                  placeholder="Enter new password"
+                  secureTextEntry
                 />
-                ) : (
+              ) : (
                 <Text style={styles.value}>••••••••</Text>
-                )}
+              )}
             </View>
 
             {isEditing && (
-                <TouchableOpacity style={styles.saveButton} onPress={handleUserSaveChanges}>
+              <TouchableOpacity
+                style={styles.saveButton}
+                onPress={handleUserSaveChanges}
+              >
                 <Text style={styles.saveButtonText}>Save Changes</Text>
-                </TouchableOpacity>
+              </TouchableOpacity>
             )}
-            </View>
+          </View>
 
-            <View style={styles.settingsButton}>
+          <View style={styles.settingsButton}>
             <TouchableOpacity onPress={handleProfileSetting}>
-                <Ionicons name="settings" size={30} color="#39B440" />
+              <Ionicons name="settings" size={30} color="#39B440" />
             </TouchableOpacity>
-            </View>
+          </View>
 
-            {openFloatingProfile && (
+          {openFloatingProfile && (
             <View style={styles.floatingCard}>
-                <View style={styles.menuContainer}>
+              <View style={styles.menuContainer}>
                 {Object.values(ItemProfileEnum).map((e, index) => (
-                    <View key={index}>
+                  <View key={index}>
                     {(() => {
-                        switch (e) {
+                      switch (e) {
                         case ItemProfileEnum.Edit:
-                            return (
+                          return (
                             <TouchableOpacity
-                                style={styles.menuItem}
-                                onPress={() => {
+                              style={styles.menuItem}
+                              onPress={() => {
                                 setIsEditing(!isEditing);
                                 setOpenFloatingProfile(false);
-                                }}
+                              }}
                             >
-                                <Ionicons
+                              <Ionicons
                                 name="pencil-sharp"
                                 size={24}
                                 color="#39B440"
-                                />
-                                <Text style={styles.menuText}>Edit</Text>
+                              />
+                              <Text style={styles.menuText}>Edit</Text>
                             </TouchableOpacity>
-                            );
+                          );
                         case ItemProfileEnum.Logout:
-                            return (
+                          return (
                             <TouchableOpacity
-                                style={styles.menuItem}
-                                onPress={handleLogout}
+                              style={styles.menuItem}
+                              onPress={handleLogout}
                             >
-                                <Ionicons
+                              <Ionicons
                                 name="log-out"
                                 size={24}
                                 color="#39B440"
-                                />
-                                <Text style={styles.menuText}>Logout</Text>
+                              />
+                              <Text style={styles.menuText}>Logout</Text>
                             </TouchableOpacity>
-                            );
+                          );
                         default:
-                            return null;
-                        }
+                          return null;
+                      }
                     })()}
-                    </View>
+                  </View>
                 ))}
-                </View>
+              </View>
             </View>
-            )}
-            {renderAdminSection()}
+          )}
+          {renderAdminSection()}
         </View>
-        </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
     </ScrollView>
   );
 };
@@ -474,7 +500,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   profileHeader: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 20,
     marginBottom: 40,
     paddingTop: 40,
@@ -484,16 +510,16 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   email: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginTop: 4,
   },
   infoContainer: {
-    backgroundColor: '#f8f8f8',
+    backgroundColor: "#f8f8f8",
     borderRadius: 12,
     padding: 16,
   },
@@ -502,32 +528,32 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 4,
   },
   value: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     borderRadius: 8,
     padding: 8,
     fontSize: 16,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   saveButton: {
-    backgroundColor: '#39B440',
+    backgroundColor: "#39B440",
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   saveButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   settingsButton: {
     position: "absolute",
@@ -569,117 +595,117 @@ const styles = StyleSheet.create({
   },
   menuText: {
     marginTop: 4,
-    color: '#333',
+    color: "#333",
   },
   adminSection: {
     marginTop: 24,
     padding: 16,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: "#f8f8f8",
     borderRadius: 12,
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 16,
   },
   managedMosqueContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     borderRadius: 8,
     marginTop: 8,
   },
   mosqueTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#666',
+    fontWeight: "600",
+    color: "#666",
     marginBottom: 8,
   },
   mosqueName: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 4,
   },
   mosqueDescription: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   mosqueImage: {
-    width: '100%',
+    width: "100%",
     height: 200,
     borderRadius: 8,
     marginTop: 12,
   },
   addMosqueContainer: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     padding: 16,
     borderRadius: 8,
   },
   textArea: {
     height: 100,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
   },
   imageButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   imageButtonText: {
-    color: '#333',
+    color: "#333",
     fontSize: 16,
   },
   previewImage: {
-    width: '100%',
+    width: "100%",
     height: 200,
     borderRadius: 8,
     marginTop: 12,
   },
   addButton: {
-    backgroundColor: '#39B440',
+    backgroundColor: "#39B440",
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   addButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     marginTop: 16,
   },
   button: {
     flex: 1,
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginHorizontal: 4,
   },
   cancelButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
   },
   cancelButtonText: {
-    color: '#666',
+    color: "#666",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   editButton: {
-    backgroundColor: '#39B440',
+    backgroundColor: "#39B440",
     padding: 12,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 16,
   },
   editButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
 });
 

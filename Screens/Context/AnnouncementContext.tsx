@@ -18,6 +18,7 @@ export type Activity = {
   startTime: string;
   endTime: string;
   createdAt: Date;
+  picture: any;
 };
 
 export type Announcement = {

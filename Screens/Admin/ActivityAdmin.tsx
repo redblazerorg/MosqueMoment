@@ -8,38 +8,104 @@ import {
   Modal,
   TextInput,
   Alert,
+  Platform,
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import React, { useState, useEffect } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../Context/AuthContext";
-import { useAnnouncements, MosqueDetails, Activity } from "../Context/AnnouncementContext";
+import {
+  useAnnouncements,
+  MosqueDetails,
+  Activity,
+} from "../Context/AnnouncementContext";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigations/AppNavigation";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 const ActivityAdmin = () => {
   const { user } = useAuth();
   const { addActivity, deleteActivity, mosqueDetails } = useAnnouncements();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [activityName, setActivityName] = useState("");
-  const [startTime, setStartTime] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [managedMosque, setManagedMosque] = useState<MosqueDetails | null>(null);
+  const [managedMosque, setManagedMosque] = useState<MosqueDetails | null>(
+    null
+  );
+
+  // Date and Time states
+  const [activityDate, setActivityDate] = useState(new Date());
+  const [startTime, setStartTime] = useState(new Date());
+  const [endTime, setEndTime] = useState(new Date());
+
+  // Visibility states for pickers
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showStartClock, setShowStartClock] = useState(false);
+  const [showEndClock, setShowEndClock] = useState(false);
+
+  const [newActivityImage, setNewActivityImage] = useState<string>("");
 
   useEffect(() => {
-    const mosque = mosqueDetails.find(m => m.adminId === user?.email);
+    const mosque = mosqueDetails.find((m) => m.adminId === user?.email);
     console.log("Found mosque:", mosque);
     if (mosque) {
       setManagedMosque(mosque);
     }
   }, [mosqueDetails, user]);
 
+  // Date picker handler
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    setShowDatePicker(Platform.OS === "ios");
+    if (selectedDate) {
+      setActivityDate(selectedDate);
+    }
+  };
+
+  // Start time picker handler
+  const handleStartTimeChange = (event: any, selectedTime?: Date) => {
+    setShowStartClock(Platform.OS === "ios");
+    if (selectedTime) {
+      setStartTime(selectedTime);
+    }
+  };
+
+  // End time picker handler
+  const handleEndTimeChange = (event: any, selectedTime?: Date) => {
+    setShowEndClock(Platform.OS === "ios");
+    if (selectedTime) {
+      setEndTime(selectedTime);
+    }
+  };
+
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== "granted") {
+      Alert.alert("Sorry, we need camera roll permissions to make this work!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+      base64: true,
+    });
+
+    if (!result.canceled && result.assets[0].base64) {
+      const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
+      setNewActivityImage(base64Image);
+    }
+  };
+
   const handleAddActivity = async () => {
-    if (!activityName.trim() || !startTime.trim() || !endTime.trim()) {
-      Alert.alert("Error", "Please fill in all fields");
+    if (!activityName.trim()) {
+      Alert.alert("Error", "Please fill in activity name");
       return;
     }
 
@@ -47,18 +113,27 @@ const ActivityAdmin = () => {
       try {
         const newActivity = {
           activityName,
-          startTime,
-          endTime,
-          date: new Date(),
-          mosqueName: managedMosque.mosque
+          startTime: startTime.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          endTime: endTime.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          date: activityDate,
+          mosqueName: managedMosque.mosque,
+          picture: newActivityImage,
         };
 
         await addActivity(managedMosque.id, newActivity);
-        
+
         setModalVisible(false);
         setActivityName("");
-        setStartTime("");
-        setEndTime("");
+        setStartTime(new Date());
+        setEndTime(new Date());
+        setActivityDate(new Date());
+        setNewActivityImage("");
         Alert.alert("Success", "Activity added successfully");
       } catch (error) {
         console.error("Error adding activity:", error);
@@ -91,8 +166,8 @@ const ActivityAdmin = () => {
               console.error("Error deleting activity:", error);
               Alert.alert("Error", "Failed to delete activity");
             }
-          }
-        }
+          },
+        },
       ]
     );
   };
@@ -108,15 +183,12 @@ const ActivityAdmin = () => {
         {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Mosque Activities</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.profileButton}
-            onPress={() => navigation.navigate('Profile')}
+            onPress={() => navigation.navigate("Profile")}
           >
             {user?.image ? (
-              <Image 
-                source={{ uri: user.image }} 
-                style={styles.profileImage} 
-              />
+              <Image source={{ uri: user.image }} style={styles.profileImage} />
             ) : (
               <Ionicons name="person-circle" size={40} color="#FFF" />
             )}
@@ -130,7 +202,7 @@ const ActivityAdmin = () => {
             <Text style={styles.mosqueSubtitle}>Mosque Administrator</Text>
 
             {/* Add Button */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.addButton}
               onPress={() => setModalVisible(true)}
             >
@@ -141,19 +213,36 @@ const ActivityAdmin = () => {
 
         {/* Activities List */}
         <View style={styles.mainContainer}>
-          <ScrollView 
+          <ScrollView
             style={styles.contentContainer}
             contentContainerStyle={styles.scrollContent}
           >
             {managedMosque?.activities?.map((activity: Activity) => (
               <View key={activity.id} style={styles.activityCard}>
                 <View style={styles.activityHeader}>
-                  <Text style={styles.activityTitle}>{activity.activityName}</Text>
-                  <TouchableOpacity onPress={() => handleDeleteActivity(activity.id)}>
+                  <Text style={styles.activityTitle}>
+                    {activity.activityName}
+                  </Text>
+
+                  <TouchableOpacity
+                    onPress={() => handleDeleteActivity(activity.id)}
+                  >
                     <Ionicons name="trash-outline" size={24} color="#FF3B30" />
                   </TouchableOpacity>
                 </View>
                 <View style={styles.activityDetails}>
+                  {/* picture here */}
+                  {activity.picture && (
+                    <Image
+                      source={{ uri: activity.picture }}
+                      style={[
+                        styles.activityImage,
+                        {
+                          marginBottom: 10,
+                        },
+                      ]}
+                    />
+                  )}
                   <View style={styles.timeContainer}>
                     <Ionicons name="time-outline" size={20} color="#666" />
                     <Text style={styles.timeText}>
@@ -179,7 +268,23 @@ const ActivityAdmin = () => {
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>New Activity</Text>
-              
+
+              <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
+                <Text style={styles.imageButtonText}>
+                  {newActivityImage
+                    ? "Change Activity Image"
+                    : "Pick Activity Image"}
+                </Text>
+              </TouchableOpacity>
+              {newActivityImage && (
+                <Image
+                  source={{ uri: newActivityImage }}
+                  style={styles.previewImage}
+                />
+              )}
+
+              <View style={{ height: 10 }}></View>
+
               <TextInput
                 style={styles.input}
                 placeholder="Activity Name"
@@ -187,33 +292,82 @@ const ActivityAdmin = () => {
                 onChangeText={setActivityName}
                 placeholderTextColor="#666"
               />
-              
-              <TextInput
+
+              {/* Date Picker */}
+              <TouchableOpacity
+                onPress={() => setShowDatePicker(true)}
                 style={styles.input}
-                placeholder="Start Time (e.g., 9:00 AM)"
-                value={startTime}
-                onChangeText={setStartTime}
-                placeholderTextColor="#666"
-              />
-              
-              <TextInput
+              >
+                <Text style={{ color: "#666" }}>
+                  {activityDate.toLocaleDateString()}
+                </Text>
+              </TouchableOpacity>
+              {showDatePicker && (
+                <DateTimePicker
+                  testID="datePicker"
+                  value={activityDate}
+                  mode="date"
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={handleDateChange}
+                />
+              )}
+
+              {/* Start Time Picker */}
+              <TouchableOpacity
+                onPress={() => setShowStartClock(true)}
                 style={styles.input}
-                placeholder="End Time (e.g., 10:00 AM)"
-                value={endTime}
-                onChangeText={setEndTime}
-                placeholderTextColor="#666"
-              />
+              >
+                <Text style={{ color: "#666" }}>
+                  {startTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </TouchableOpacity>
+              {showStartClock && (
+                <DateTimePicker
+                  testID="startTimePicker"
+                  value={startTime}
+                  mode="time"
+                  is24Hour={false}
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={handleStartTimeChange}
+                />
+              )}
+
+              {/* End Time Picker */}
+              <TouchableOpacity
+                onPress={() => setShowEndClock(true)}
+                style={styles.input}
+              >
+                <Text style={{ color: "#666" }}>
+                  {endTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </Text>
+              </TouchableOpacity>
+              {showEndClock && (
+                <DateTimePicker
+                  testID="endTimePicker"
+                  value={endTime}
+                  mode="time"
+                  is24Hour={false}
+                  display={Platform.OS === "ios" ? "spinner" : "default"}
+                  onChange={handleEndTimeChange}
+                />
+              )}
 
               <View style={styles.modalButtons}>
-                <TouchableOpacity 
-                  style={[styles.modalButton, { backgroundColor: '#FF3B30' }]}
+                <TouchableOpacity
+                  style={[styles.modalButton, { backgroundColor: "#FF3B30" }]}
                   onPress={() => setModalVisible(false)}
                 >
                   <Text style={styles.buttonText}>Cancel</Text>
                 </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={[styles.modalButton, { backgroundColor: '#39B440' }]}
+
+                <TouchableOpacity
+                  style={[styles.modalButton, { backgroundColor: "#39B440" }]}
                   onPress={handleAddActivity}
                 >
                   <Text style={styles.buttonText}>Add</Text>
@@ -235,19 +389,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     padding: 20,
     paddingTop: 60,
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFF',
+    fontWeight: "bold",
+    color: "#FFF",
   },
   profileButton: {
-    position: 'absolute',
+    position: "absolute",
     top: 50,
     right: 20,
     zIndex: 1,
@@ -257,20 +411,20 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: 'white',
+    borderColor: "white",
   },
   mosqueInfoContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   mosqueName: {
     fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFF',
+    fontWeight: "bold",
+    color: "#FFF",
   },
   mosqueSubtitle: {
     fontSize: 16,
-    color: '#FFF',
+    color: "#FFF",
     opacity: 0.8,
   },
   mainContainer: {
@@ -278,7 +432,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
   },
@@ -287,55 +441,55 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   activityCard: {
-    backgroundColor: '#FFF',
+    backgroundColor: "#FFF",
     borderRadius: 15,
     padding: 15,
     marginBottom: 15,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
   activityHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 10,
   },
   activityTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     flex: 1,
   },
   activityDetails: {
     marginTop: 5,
   },
   timeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 5,
   },
   timeText: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
     marginLeft: 5,
   },
   activityDate: {
     fontSize: 14,
-    color: '#999',
+    color: "#999",
   },
   addButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 30,
     right: 30,
-    backgroundColor: '#39B440',
+    backgroundColor: "#39B440",
     width: 40,
     height: 40,
     borderRadius: 30,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -344,45 +498,68 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContent: {
-    width: '90%',
-    backgroundColor: '#FFF',
+    width: "90%",
+    backgroundColor: "#FFF",
     borderRadius: 20,
     padding: 20,
   },
+  imageButton: {
+    backgroundColor: "#f0f0f0",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 16,
+  },
+  imageButtonText: {
+    color: "#333",
+    fontSize: 16,
+  },
+  previewImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginTop: 12,
+  },
   modalTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#DDD',
+    borderColor: "#DDD",
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
     fontSize: 16,
   },
   modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   modalButton: {
     flex: 1,
     padding: 15,
     borderRadius: 10,
     marginHorizontal: 5,
-    alignItems: 'center',
+    alignItems: "center",
   },
   buttonText: {
-    color: '#FFF',
+    color: "#FFF",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
+  },
+  activityImage: {
+    width: "100%",
+    height: 200,
+    borderRadius: 8,
+    marginTop: 12,
   },
 });
 

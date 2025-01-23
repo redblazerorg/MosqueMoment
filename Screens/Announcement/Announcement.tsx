@@ -30,10 +30,12 @@ const Announcement = () => {
       id: activity.id || Date.now(), // Generate an ID if not provided
       // title: activity.title,
       // description: activity.second,
+      activityType: activity.activityType,
       picture: activity.picture,
       mosqueName: activity.mosqueName || "", // Add mosque name
       activityName: activity.title || activity.activityName, // Handle both old and new property names
       date: new Date(activity.date),
+      endDate: new Date(activity.endDate),
       startTime: activity.startTime,
       endTime: activity.endTime,
       createdAt: activity.createdAt || new Date(), // Add creation date

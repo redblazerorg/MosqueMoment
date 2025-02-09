@@ -1,132 +1,79 @@
-import React, { createContext, ReactNode, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuth } from './AuthContext';
-
-export type NotificationType = 'announcement' | 'activity';
-
-export type Notification = {
-  id: number;
-  userEmail: string;
-  mosqueId: number;
-  mosqueName: string;
-  message: string;
-  type: NotificationType;
-  read: boolean;
-  createdAt: Date;
-};
+import * as Notifications from 'expo-notifications';
 
 interface NotificationContextType {
-  notifications: Notification[];
-  unreadCount: number;
-  addNotification: (notification: Omit<Notification, 'id' | 'createdAt' | 'read'>) => Promise<void>;
-  markAsRead: (notificationId: number) => Promise<void>;
-  markAllAsRead: () => Promise<void>;
-  deleteNotification: (notificationId: number) => Promise<void>;
-  getNotificationsForMosque: (mosqueId: number) => Notification[];
+  savePushToken: (userEmail: string, token: string) => Promise<void>;
+  sendNotificationToSubscribers: (mosqueId: number, title: string, body: string) => Promise<void>;
+  getUserPushToken: (userEmail: string) => Promise<string | null>;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
 
-export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    if (user?.email) {
-      loadNotifications();
-    }
-  }, [user]);
-
-  const loadNotifications = async () => {
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const savePushToken = async (userEmail: string, token: string) => {
     try {
-      const stored = await AsyncStorage.getItem(`notifications_${user?.email}`);
-      if (stored) {
-        const loadedNotifications = JSON.parse(stored);
-        setNotifications(loadedNotifications);
-        updateUnreadCount(loadedNotifications);
+      await AsyncStorage.setItem(`pushToken_${userEmail}`, token);
+    } catch (error) {
+      console.error('Error saving push token:', error);
+    }
+  };
+
+  const getUserPushToken = async (userEmail: string): Promise<string | null> => {
+    try {
+      return await AsyncStorage.getItem(`pushToken_${userEmail}`);
+    } catch (error) {
+      console.error('Error getting push token:', error);
+      return null;
+    }
+  };
+
+  const sendNotificationToSubscribers = async (mosqueId: number, title: string, body: string) => {
+    try {
+      // Get all users' subscriptions
+      const allKeys = await AsyncStorage.getAllKeys();
+      const subscriptionKeys = allKeys.filter(key => key.startsWith('subscriptions_'));
+      
+      for (const key of subscriptionKeys) {
+        const userEmail = key.replace('subscriptions_', '');
+        const subscriptionsJson = await AsyncStorage.getItem(key);
+        const subscriptions = subscriptionsJson ? JSON.parse(subscriptionsJson) : [];
+        
+        // Check if user is subscribed to this mosque
+        if (subscriptions.includes(mosqueId)) {
+          const pushToken = await getUserPushToken(userEmail);
+          
+          if (pushToken) {
+            // Send notification using Expo's push notification service
+            await fetch('https://exp.host/--/api/v2/push/send', {
+              method: 'POST',
+              headers: {
+                'Accept': 'application/json',
+                'Accept-encoding': 'gzip, deflate',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                to: pushToken,
+                sound: 'default',
+                title,
+                body,
+                data: { mosqueId },
+              }),
+            });
+          }
+        }
       }
     } catch (error) {
-      console.error('Error loading notifications:', error);
+      console.error('Error sending notifications:', error);
     }
-  };
-
-  const saveNotifications = async (updatedNotifications: Notification[]) => {
-    try {
-      if (user?.email) {
-        await AsyncStorage.setItem(
-          `notifications_${user.email}`,
-          JSON.stringify(updatedNotifications)
-        );
-        setNotifications(updatedNotifications);
-        updateUnreadCount(updatedNotifications);
-      }
-    } catch (error) {
-      console.error('Error saving notifications:', error);
-    }
-  };
-
-  const updateUnreadCount = (notificationsList: Notification[]) => {
-    const count = notificationsList.filter(n => !n.read).length;
-    setUnreadCount(count);
-  };
-
-  const addNotification = async (
-    notification: Omit<Notification, 'id' | 'createdAt' | 'read'>
-  ) => {
-    const newNotification: Notification = {
-      ...notification,
-      id: Date.now(),
-      createdAt: new Date(),
-      read: false,
-    };
-
-    const updatedNotifications = [...notifications, newNotification];
-    await saveNotifications(updatedNotifications);
-  };
-
-  const markAsRead = async (notificationId: number) => {
-    const updatedNotifications = notifications.map(notification =>
-      notification.id === notificationId
-        ? { ...notification, read: true }
-        : notification
-    );
-    await saveNotifications(updatedNotifications);
-  };
-
-  const markAllAsRead = async () => {
-    const updatedNotifications = notifications.map(notification => ({
-      ...notification,
-      read: true,
-    }));
-    await saveNotifications(updatedNotifications);
-  };
-
-  const deleteNotification = async (notificationId: number) => {
-    const updatedNotifications = notifications.filter(
-      notification => notification.id !== notificationId
-    );
-    await saveNotifications(updatedNotifications);
-  };
-
-  const getNotificationsForMosque = (mosqueId: number): Notification[] => {
-    return notifications.filter(notification => notification.mosqueId === mosqueId);
   };
 
   return (
-    <NotificationContext.Provider
-      value={{
-        notifications,
-        unreadCount,
-        addNotification,
-        markAsRead,
-        markAllAsRead,
-        deleteNotification,
-        getNotificationsForMosque,
-      }}
-    >
+    <NotificationContext.Provider value={{
+      savePushToken,
+      sendNotificationToSubscribers,
+      getUserPushToken,
+    }}>
       {children}
     </NotificationContext.Provider>
   );

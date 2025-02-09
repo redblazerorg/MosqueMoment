@@ -39,6 +39,7 @@ export type Announcement = {
   date: Date;
   mosqueName: string;
   createdAt: Date;
+  picture: any;
 };
 
 export type MosqueDetails = {

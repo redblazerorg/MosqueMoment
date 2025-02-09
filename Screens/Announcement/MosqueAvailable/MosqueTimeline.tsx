@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image } from "react-native";
 import { Activity, MosqueDetails } from "../../Context/AnnouncementContext";
+import PagerView from "react-native-pager-view";
 
 interface TimelineItemProps {
   activity: Activity;
@@ -22,11 +23,11 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ activity, isLast }) => {
   return (
     <View style={styles.timelineItem}>
       {/* Date Column */}
-      <View style={styles.dateColumn}>
+      {/* <View style={styles.dateColumn}>
         {endDate ? (
-          <>
-            {/* Display date range */}
-            <Text style={styles.dayText}>
+          <> */}
+      {/* Display date range */}
+      {/* <Text style={styles.dayText}>
               {startDay}
               {startDay !== endDay ? ` - ${endDay}` : ""}
             </Text>
@@ -35,23 +36,59 @@ const TimelineItem: React.FC<TimelineItemProps> = ({ activity, isLast }) => {
             </Text>
           </>
         ) : (
-          <>
-            {/* Display single date */}
-            <Text style={styles.dayText}>{startDay}</Text>
+          <> */}
+      {/* Display single date */}
+      {/* <Text style={styles.dayText}>{startDay}</Text>
             <Text style={styles.monthText}>{startMonth}</Text>
           </>
-        )}
+        )} */}
 
-        {/* Timeline dot and line */}
-        <View style={styles.timelineDot} />
+      {/* Timeline dot and line */}
+      {/* <View style={styles.timelineDot} />
         {!isLast && <View style={styles.timelineLine} />}
-      </View>
+      </View> */}
 
       {/* Content Column */}
       <View style={styles.contentCard}>
-        <View style={[styles.statusBadge, { backgroundColor: "#00BFA6" }]}>
-          <Text style={styles.statusText}>Active</Text>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={[styles.statusBadge, { backgroundColor: "#00BFA6" }]}>
+            <Text style={styles.statusText}>Active</Text>
+          </View>
+          <View>
+            {endDate ? (
+              <>
+                {/* Display date range */}
+                <Text style={styles.dayText}>
+                  {startDay}
+                  {startDay !== endDay ? ` - ${endDay}` : ""}
+                </Text>
+                <Text
+                  style={[
+                    styles.monthText,
+                    {
+                      alignSelf: "flex-end",
+                    },
+                  ]}
+                >
+                  {startMonth} {startMonth !== endMonth && `- ${endMonth}`}
+                </Text>
+              </>
+            ) : (
+              <>
+                {/* Display single date */}
+                <Text style={styles.dayText}>{startDay}</Text>
+                <Text style={styles.monthText}>{startMonth}</Text>
+              </>
+            )}
+          </View>
         </View>
+
         {activity.picture && (
           <Image
             source={{ uri: activity.picture }}
@@ -99,24 +136,73 @@ const MosqueTimeline: React.FC<MosqueTimelineProps> = ({
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
+  const [currentPage, setCurrentPage] = useState(0);
+  const showDots = sortedActivities.length > 1;
+
   return (
-    <FlatList
-      data={sortedActivities}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item, index }) => (
-        <TimelineItem
-          activity={item}
-          isLast={index === sortedActivities.length - 1}
-        />
+    <View style={styles.container}>
+      <PagerView
+        style={styles.pager}
+        initialPage={0}
+        onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
+      >
+        {sortedActivities.map((item, index) => (
+          <TimelineItem
+            key={item.id.toString()}
+            activity={item}
+            isLast={index === sortedActivities.length - 1}
+          />
+        ))}
+      </PagerView>
+
+      {/* Pagination Dots */}
+      {showDots && (
+        <View style={styles.paginationContainer}>
+          <FlatList
+            data={sortedActivities}
+            keyExtractor={(item, index) => index.toString()}
+            horizontal
+            renderItem={({ index }) => (
+              <View
+                style={[
+                  styles.dot,
+                  currentPage === index ? styles.activeDot : null,
+                ]}
+              />
+            )}
+          />
+        </View>
       )}
-      contentContainerStyle={styles.container}
-    />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  paginationContainer: {
+    // backgroundColor: "red",
+    flexDirection: "row",
+    // paddingTop: 10,
+    alignSelf: "center",
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#ccc", // Inactive dot color
+    marginHorizontal: 5,
+  },
+  activeDot: {
+    backgroundColor: "green", // Active dot color
+    width: 10,
+    height: 10,
+  },
+  pager: {
+    // flex: 1,
+    width: "100%", // Full width for smooth swiping
+    height: 335, // Adjust height as needed
+  },
   container: {
-    padding: 16,
+    // padding: 16,
   },
   timelineItem: {
     flexDirection: "row",

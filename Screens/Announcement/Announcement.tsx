@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Dimensions,
   SafeAreaView,
+  Image,
 } from "react-native";
 import { Activity, useAnnouncements } from "../Context/AnnouncementContext";
 import { useNavigation } from "@react-navigation/native";
@@ -86,13 +87,39 @@ const Announcement = () => {
                     >
                       {announcement.title}
                     </Text>
-                    <Text style={{ fontSize: 14, color: "gray" }}>
-                      {new Date(announcement.date).toLocaleDateString()} -{" "}
-                      {new Date(announcement.date).toLocaleTimeString()}
-                    </Text>
-                    <Text style={{ fontSize: 14 }}>
-                      {announcement.description}
-                    </Text>
+                    {announcement.picture && (
+                      <Image
+                        source={{ uri: announcement.picture }}
+                        style={[
+                          {
+                            width: "100%",
+                            height: 200,
+                            borderRadius: 8,
+                            marginTop: 12,
+                          },
+                          {
+                            marginBottom: 10,
+                          },
+                        ]}
+                      />
+                    )}
+
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Text style={{ fontSize: 14, flexShrink: 1 }}>
+                        {announcement.description}
+                      </Text>
+                      <Text style={{ fontSize: 14, color: "gray" }}>
+                        {new Date(announcement.date).toLocaleDateString()} -{" "}
+                        {new Date(announcement.date).toLocaleTimeString()}
+                      </Text>
+                    </View>
+
                     <View
                       style={{
                         marginTop: 5,
@@ -106,7 +133,7 @@ const Announcement = () => {
                   <View>
                     <Text
                       style={{
-                        marginTop: 5,
+                        marginVertical: 10,
                         fontSize: 14,
                         fontWeight: "bold",
                       }}

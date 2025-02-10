@@ -7,7 +7,6 @@ import {
 } from "react";
 import { useAuth } from "../Context/AuthContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNotifications } from './NotificationContext';
 // import MosqueDetails from "../Model/AnnouncementData";
 
 export enum MosqueActivity {
@@ -204,45 +203,12 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
   const [filteredMosqueDetails, setFilteredMosqueDetails] = useState<
     MosqueDetails[]
   >([]);
-  const { sendNotificationToSubscribers } = useNotifications();
   const { user, updateUser } = useAuth(); // Get current user
 
   useEffect(() => {
     // Load mosque details from AsyncStorage on mount
     loadMosqueDetails();
   }, []);
-
-  const addAnnouncement = async (
-    mosqueId: number,
-    announcement: Omit<Announcement, "id" | "createdAt">
-  ) => {
-    const updatedMosques = mosqueDetails.map((mosque) => {
-      if (mosque.id === mosqueId && mosque.adminId === user?.email) {
-        const newAnnouncement = {
-          ...announcement,
-          id: Date.now(),
-          createdAt: new Date(),
-        };
-        return {
-          ...mosque,
-          announcement: [...mosque.announcement, newAnnouncement],
-        };
-      }
-      return mosque;
-    });
-
-    await saveMosqueDetails(updatedMosques);
-    
-    // Send notification to subscribers
-    const mosque = mosqueDetails.find(m => m.id === mosqueId);
-    if (mosque) {
-      await sendNotificationToSubscribers(
-        mosqueId,
-        announcement.title,
-        `New announcement from ${mosque.mosque}: ${announcement.description}`
-      );
-    }
-  };
 
   const loadMosqueDetails = async () => {
     try {
@@ -373,6 +339,29 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
       console.error("Error saving mosque details:", error);
       throw error;
     }
+  };
+
+  const addAnnouncement = async (
+    mosqueId: number,
+    announcement: Omit<Announcement, "id" | "createdAt">
+  ) => {
+    const updatedMosques = mosqueDetails.map((mosque) => {
+      if (mosque.id === mosqueId && mosque.adminId === user?.email) {
+        const newAnnouncement = {
+          ...announcement,
+          id: Date.now(),
+          createdAt: new Date(),
+        };
+        return {
+          ...mosque,
+          announcement: [...mosque.announcement, newAnnouncement],
+        };
+      }
+      return mosque;
+    });
+
+    await saveMosqueDetails(updatedMosques);
+    // Here implement notification logic for subscribers
   };
 
   const deleteAnnouncement = async (

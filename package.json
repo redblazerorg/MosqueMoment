@@ -24,7 +24,7 @@
     "expo": "~52.0.23",
     "expo-image-picker": "~16.0.4",
     "expo-linear-gradient": "~14.0.2",
-    "expo-location": "~18.0.5",
+    "expo-location": "~18.0.6",
     "expo-sensors": "~14.0.2",
     "expo-status-bar": "~2.0.0",
     "moment-hijri": "^3.0.0",

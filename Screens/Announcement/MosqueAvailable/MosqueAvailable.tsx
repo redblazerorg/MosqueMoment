@@ -18,6 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import { AnnouncementStackParamList } from "../../../navigations/AppNavigation";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import MosqueTimeline from "./MosqueTimeline";
+import NearestMosque from "../NearestMosque/NearestMosque";
 
 type NavigationProp = NativeStackNavigationProp<AnnouncementStackParamList>;
 
@@ -28,7 +29,9 @@ const MosqueAvailable = () => {
   const navigation = useNavigation<NavigationProp>();
 
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [searchType, setSearchType] = useState<"mosque" | "activity">("mosque");
+  const [searchType, setSearchType] = useState<
+    "mosque" | "activity" | "nearby"
+  >("mosque");
 
   const handleSearch = (text: string) => {
     setSearchKeyword(text);
@@ -88,6 +91,26 @@ const MosqueAvailable = () => {
           <TouchableOpacity
             style={[
               styles.searchTypeButton,
+              searchType === "nearby" && styles.activeSearchType,
+            ]}
+            onPress={() => {
+              setSearchType("nearby");
+              handleSearch(searchKeyword);
+            }}
+          >
+            <Text
+              style={[
+                styles.searchTypeText,
+                searchType === "nearby" && styles.activeSearchTypeText,
+              ]}
+            >
+              Nearby
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.searchTypeButton,
               searchType === "activity" && styles.activeSearchType,
             ]}
             onPress={() => {
@@ -107,77 +130,81 @@ const MosqueAvailable = () => {
         </View>
       </View>
 
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        data={filteredMosqueDetails}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <View key={item.id} style={styles.mosqueCard}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("MosqueDetail", {
-                  mosqueSelected: convertMosqueForNavigation(item),
-                })
-              }
-            >
-              <View style={styles.mosqueContent}>
-                <View style={styles.mosqueInfo}>
-                  <Text style={styles.mosqueName}>{item.mosque}</Text>
-                  <Text numberOfLines={6} style={styles.mosqueDescription}>
-                    {item.description}
-                  </Text>
-                  {searchType === "activity" &&
-                    item.activities?.some((activity) =>
-                      activity.activityName
-                        .toLowerCase()
-                        .includes(searchKeyword.toLowerCase())
-                    ) && (
-                      <View style={styles.activitiesContainer}>
-                        <Text style={styles.activitiesTitle}>
-                          Matching Activities:
-                        </Text>
-                        {item.activities
-                          .filter((activity) =>
-                            activity.activityName
-                              .toLowerCase()
-                              .includes(searchKeyword.toLowerCase())
-                          )
-                          .map((activity, idx) => (
-                            <Text key={idx} style={styles.activityItem}>
-                              • {activity.activityName}
-                            </Text>
-                          ))}
-                      </View>
-                    )}
-                </View>
-                {/* Show activities if searching by activity */}
-
-                {item.picture && (
-                  <Image
-                    source={{ uri: item.picture }}
-                    style={styles.mosqueImage}
-                  />
-                )}
-              </View>
+      {searchType === "nearby" ? (
+        <NearestMosque />
+      ) : (
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={filteredMosqueDetails}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <View key={item.id} style={styles.mosqueCard}>
               <TouchableOpacity
-                style={styles.subscribeButton}
-                onPress={() => subscribe(item.id)}
+                onPress={() =>
+                  navigation.navigate("MosqueDetail", {
+                    mosqueSelected: convertMosqueForNavigation(item),
+                  })
+                }
               >
-                <Text style={styles.subscribeButtonText}>
-                  {item.isSubscribe ? "Unsubscribe" : "Subscribe"}
-                </Text>
+                <View style={styles.mosqueContent}>
+                  <View style={styles.mosqueInfo}>
+                    <Text style={styles.mosqueName}>{item.mosque}</Text>
+                    <Text numberOfLines={6} style={styles.mosqueDescription}>
+                      {item.description}
+                    </Text>
+                    {searchType === "activity" &&
+                      item.activities?.some((activity) =>
+                        activity.activityName
+                          .toLowerCase()
+                          .includes(searchKeyword.toLowerCase())
+                      ) && (
+                        <View style={styles.activitiesContainer}>
+                          <Text style={styles.activitiesTitle}>
+                            Matching Activities:
+                          </Text>
+                          {item.activities
+                            .filter((activity) =>
+                              activity.activityName
+                                .toLowerCase()
+                                .includes(searchKeyword.toLowerCase())
+                            )
+                            .map((activity, idx) => (
+                              <Text key={idx} style={styles.activityItem}>
+                                • {activity.activityName}
+                              </Text>
+                            ))}
+                        </View>
+                      )}
+                  </View>
+                  {/* Show activities if searching by activity */}
+
+                  {item.picture && (
+                    <Image
+                      source={{ uri: item.picture }}
+                      style={styles.mosqueImage}
+                    />
+                  )}
+                </View>
+                <TouchableOpacity
+                  style={styles.subscribeButton}
+                  onPress={() => subscribe(item.id)}
+                >
+                  <Text style={styles.subscribeButtonText}>
+                    {item.isSubscribe ? "Unsubscribe" : "Subscribe"}
+                  </Text>
+                </TouchableOpacity>
               </TouchableOpacity>
-            </TouchableOpacity>
-            <View style={{ height: 10 }}></View>
-            {searchType === "activity" && (
-              <MosqueTimeline
-                mosqueDetails={[item]}
-                searchKeyword={searchKeyword.toLowerCase()}
-              />
-            )}
-          </View>
-        )}
-      />
+              <View style={{ height: 10 }}></View>
+              {searchType === "activity" && item.activities?.length > 0 && (
+                <MosqueTimeline
+                  mosqueDetails={[item]}
+                  searchKeyword={searchKeyword.toLowerCase()}
+                />
+              )}
+            </View>
+          )}
+        />
+      )}
     </View>
   );
 };

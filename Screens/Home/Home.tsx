@@ -18,7 +18,11 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../navigations/AppNavigation"; // Reusing your navigation types
 import { PrayerTimesResponse } from "../Model/PrayerTimeModel";
-import { getPrayerTimesByCity } from "../Service/api";
+import {
+  getPrayerTimesByCity,
+  getPrayerTimesByCoordinates,
+} from "../Service/api";
+import * as Location from "expo-location";
 
 const Home = () => {
   const width = Dimensions.get("window").width;
@@ -45,13 +49,27 @@ const Home = () => {
   }, []);
 
   const fetchPrayerTimes = async () => {
-    const response: PrayerTimesResponse | null = await getPrayerTimesByCity(
-      "Cyberjaya",
-      "Malaysia"
-    );
-    if (response) {
-      const { Fajr, Dhuhr, Asr, Maghrib, Isha } = response.data.timings;
-      setPrayerTimes({ Fajr, Dhuhr, Asr, Maghrib, Isha });
+    try {
+      // Request location permissions
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.error("Permission to access location was denied");
+        return;
+      }
+
+      // Get user's location
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+      console.log("User Location:", latitude, longitude);
+
+      // Fetch prayer times with coordinates
+      const response = await getPrayerTimesByCoordinates(latitude, longitude);
+      if (response) {
+        const { Fajr, Dhuhr, Asr, Maghrib, Isha } = response.data.timings;
+        setPrayerTimes({ Fajr, Dhuhr, Asr, Maghrib, Isha });
+      }
+    } catch (error) {
+      console.error("Failed to fetch prayer times:", error);
     }
   };
 

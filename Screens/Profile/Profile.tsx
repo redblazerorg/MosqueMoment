@@ -20,6 +20,8 @@ import {
 import { useAuth, User } from "../Context/AuthContext";
 import * as ImagePicker from "expo-image-picker";
 import { useFocusEffect } from "@react-navigation/native";
+import axios from "axios";
+import { GOOGLE_PLACES_API_KEY } from "../Keys/Keys";
 
 const Profile = ({ navigation }: { navigation: any }) => {
   const width = Dimensions.get("window").width;
@@ -40,6 +42,9 @@ const Profile = ({ navigation }: { navigation: any }) => {
   const [editedMosqueName, setEditedMosqueName] = useState("");
   const [editedMosqueDescription, setEditedMosqueDescription] = useState("");
   const [newMosqueImage, setNewMosqueImage] = useState<string>("");
+
+  const [mosqueLat, setMosqueLat] = useState<number>(0);
+  const [mosqueLong, setMosqueLong] = useState<number>(0);
 
   useEffect(() => {
     const loadMosqueData = async () => {
@@ -66,6 +71,33 @@ const Profile = ({ navigation }: { navigation: any }) => {
       }));
     }
   }, [user]);
+
+  useEffect(() => {
+    if (editedMosqueName.length > 2) {
+      fetchMosqueLocation(editedMosqueName);
+    }
+  }, [editedMosqueName]);
+
+  const fetchMosqueLocation = async (mosqueName: string) => {
+    const url = `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(
+      mosqueName
+    )}&inputtype=textquery&fields=geometry&key=${GOOGLE_PLACES_API_KEY}`;
+
+    try {
+      const response = await axios.get(url);
+      const candidates = response.data.candidates;
+
+      if (candidates.length > 0) {
+        console.log(candidates[0].geometry.location);
+
+        const location = candidates[0].geometry.location;
+        setMosqueLat(location.lat);
+        setMosqueLong(location.lng);
+      }
+    } catch (error) {
+      console.error("Error fetching mosque location:", error);
+    }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -202,10 +234,15 @@ const Profile = ({ navigation }: { navigation: any }) => {
     }
 
     try {
+      console.log(mosqueLat);
+      console.log(mosqueLong);
+
       await addMosque(
         editedMosqueName,
         editedMosqueDescription,
-        newMosqueImage
+        newMosqueImage,
+        mosqueLat,
+        mosqueLong
       );
       Alert.alert("Success", "Mosque added successfully");
 

@@ -64,7 +64,9 @@ interface AnnouncementContextType {
   addMosque: (
     mosqueName: string,
     description: string,
-    picture: string
+    picture: string,
+    mosqueLat: number,
+    mosqueLong: number
   ) => Promise<void>;
   getMosqueByAdminId: (adminEmail: string) => MosqueDetails | undefined;
   updateMosquePicture: (mosqueId: number, picture: string) => Promise<void>;
@@ -248,7 +250,9 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
   const addMosque = async (
     mosqueName: string,
     description: string,
-    picture: string
+    picture: string,
+    mosqueLat: number,
+    mosqueLong: number
   ) => {
     if (!user?.email || user.role !== "admin") return;
 
@@ -265,8 +269,8 @@ export const AnnouncementProvider: React.FC<{ children: ReactNode }> = ({
       mosque: mosqueName,
       description: description,
       picture: picture,
-      mosqueLat: 0,
-      mosqueLong: 0,
+      mosqueLat: mosqueLat,
+      mosqueLong: mosqueLong,
       announcement: [],
       activities: [],
       isSubscribe: false,

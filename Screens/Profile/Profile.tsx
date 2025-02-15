@@ -73,9 +73,15 @@ const Profile = ({ navigation }: { navigation: any }) => {
   }, [user]);
 
   useEffect(() => {
-    if (editedMosqueName.length > 2) {
-      fetchMosqueLocation(editedMosqueName);
-    }
+    const debounceFetch = setTimeout(() => {
+      if (editedMosqueName.length > 2) {
+        fetchMosqueLocation(editedMosqueName);
+      }
+
+      console.log("search is doing");
+    }, 500);
+
+    return () => clearTimeout(debounceFetch);
   }, [editedMosqueName]);
 
   const fetchMosqueLocation = async (mosqueName: string) => {

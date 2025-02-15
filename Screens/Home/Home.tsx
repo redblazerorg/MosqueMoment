@@ -26,7 +26,7 @@ import * as Location from "expo-location";
 
 const Home = () => {
   const width = Dimensions.get("window").width;
-  const { user } = useAuth();
+  const { user, updateUserLocation } = useAuth();
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -64,6 +64,7 @@ const Home = () => {
 
       // Fetch prayer times with coordinates
       const response = await getPrayerTimesByCoordinates(latitude, longitude);
+      updateUserLocation(latitude, longitude, user);
       if (response) {
         const { Fajr, Dhuhr, Asr, Maghrib, Isha } = response.data.timings;
         setPrayerTimes({ Fajr, Dhuhr, Asr, Maghrib, Isha });

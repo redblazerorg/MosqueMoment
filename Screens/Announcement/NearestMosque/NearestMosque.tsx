@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   Button,
   Dimensions,
+  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,6 +16,26 @@ import {
   MosqueDetails,
   useAnnouncements,
 } from "../../Context/AnnouncementContext";
+
+const getDistance = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+): number => {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const R = 6371; // Earth’s radius in km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) *
+      Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+};
 
 const MosqueLocation = () => {
   // States
@@ -31,6 +52,7 @@ const MosqueLocation = () => {
 
   // Context and refs
   const { mosqueDetails, subscribe } = useAnnouncements();
+
   const mapRef = useRef<MapView>(null);
   const { width, height } = Dimensions.get("window");
 
@@ -81,7 +103,14 @@ const MosqueLocation = () => {
           longitude: mosque.mosqueLong,
         }}
         onPress={() => handleMarkerPress(mosque)}
-      />
+        // image={require("../../../assets/images/mosque_logo.png")}
+        // style={{ width: 20, height: 20 }}
+      >
+        <Image
+          source={require("../../../assets/images/mosque_logo.png")}
+          style={{ height: 50, width: 50 }}
+        />
+      </Marker>
     );
   };
 
@@ -124,7 +153,7 @@ const MosqueLocation = () => {
 
       {/* Bottom Sheet */}
       <View
-        style={[styles.bottomSheet, { height: openSheet ? height * 0.9 : 0 }]}
+        style={[styles.bottomSheet, { height: openSheet ? height * 0.3 : 0 }]}
       >
         <TouchableOpacity
           style={styles.closeButton}
@@ -137,19 +166,20 @@ const MosqueLocation = () => {
           <View style={styles.mosqueDetails}>
             <Text style={styles.sheetTitle}>{selectedMosque.mosque}</Text>
             <TouchableOpacity
-              onPress={() =>
+              onPress={() => {
                 navigateToLocation(
                   selectedMosque.mosqueLat,
                   selectedMosque.mosqueLong
-                )
-              }
+                );
+                handleAvailableLocation();
+              }}
             >
               <Text style={styles.sheetContent}>
                 {selectedMosque.description}
               </Text>
 
               <View style={styles.activitySection}>
-                <Text style={styles.sectionTitle}>Activities:</Text>
+                {/* <Text style={styles.sectionTitle}>Activities:</Text>
                 {selectedMosque.activities.map((activity) => (
                   <View key={activity.id} style={styles.activityItem}>
                     <Text style={styles.activityName}>
@@ -160,13 +190,39 @@ const MosqueLocation = () => {
                       Time: {activity.startTime} - {activity.endTime}
                     </Text>
                   </View>
-                ))}
+                ))} */}
               </View>
 
-              <Button
-                title={selectedMosque.isSubscribe ? "Unsubscribe" : "Subscribe"}
+              <TouchableOpacity
                 onPress={() => subscribe(selectedMosque.id)}
-              />
+                style={[
+                  {
+                    padding: 10,
+                    borderRadius: 8,
+                    alignItems: "center",
+                  },
+                  {
+                    backgroundColor: mosqueDetails.find(
+                      (e) => e.id === selectedMosque?.id
+                    )?.isSubscribe
+                      ? "red"
+                      : "green",
+                  },
+                ]}
+              >
+                <Text
+                  style={{
+                    color: "white",
+                    fontSize: 16,
+                    fontWeight: "bold",
+                  }}
+                >
+                  {mosqueDetails.find((e) => e.id === selectedMosque.id)
+                    ?.isSubscribe
+                    ? "Unsubscribe"
+                    : "Subscribe"}
+                </Text>
+              </TouchableOpacity>
             </TouchableOpacity>
           </View>
         )}
@@ -176,17 +232,28 @@ const MosqueLocation = () => {
       {openFloatingLocation && (
         <View style={styles.floatingCard}>
           <Text style={styles.cardText}>Nearby Mosques</Text>
-          {mosqueDetails.map((mosque) => (
-            <TouchableOpacity
-              key={mosque.id}
-              onPress={() => {
-                navigateToLocation(mosque.mosqueLat, mosque.mosqueLong);
-              }}
-              style={styles.mosqueItem}
-            >
-              <Text>{mosque.mosque}</Text>
-            </TouchableOpacity>
-          ))}
+          {mosqueDetails.map((mosque) => {
+            const distance = getDistance(
+              location?.coords.latitude || 0,
+              location?.coords.longitude || 0,
+              mosque.mosqueLat,
+              mosque.mosqueLong
+            ).toFixed(2); // Convert to 2 decimal places
+
+            return (
+              <TouchableOpacity
+                key={mosque.id}
+                onPress={() => {
+                  navigateToLocation(mosque.mosqueLat, mosque.mosqueLong);
+                  setOpenFloatingLocation(false);
+                }}
+                style={styles.mosqueItem}
+              >
+                <Text>{mosque.mosque}</Text>
+                <Text>{distance} km away</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       )}
     </View>
